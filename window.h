@@ -8,6 +8,7 @@
 #include "game.h"
 #include <SDL2/SDL.h>
 
+
 /* ---DEFINITIONS--- */
 
 #define SCREEN_WIDTH 640

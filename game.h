@@ -8,6 +8,9 @@
 #include "window.h"
 #include <stdint.h>
 
+
+/* ---DEFINITIONS--- */
+
 #define ROWS 6
 #define COLUMS 7
 #define PLAYER_Y 1
@@ -20,7 +23,6 @@ enum gameState {
     PLAYER_R_WON_STATE = 3,
     TIE_STATE = 4,
 };
-
 enum cellState {
     EMPTY = 0,
     YELLOW = 1,
@@ -34,6 +36,9 @@ typedef struct {
 } game_t;
 
 void clickedOnColumn(game_t *game, int row, int column);
+
+
+/* ---IMPLEMENTATIONS--- */
 
 void clickedOnColumn(game_t *game, int row, int column) {
 

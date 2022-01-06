@@ -5,6 +5,7 @@
 #include "window.h"
 #include "game.h"
 
+
 int main(int argc, char **argv) {
     if (SDL_Init(SDL_INIT_VIDEO)) {
         printf("Could not initialize sdl2: %s\n", SDL_GetError());
@@ -51,8 +52,7 @@ int main(int argc, char **argv) {
                     clickedOnColumn(&game, e.button.y / columnHeight, e.button.x / columnWidth);
                     break;
 
-                default: {
-                }
+                default: {}
             }
         }
 
