@@ -22,5 +22,7 @@ void renderGameOverState(SDL_Renderer *renderer, const game_t *game, const SDL_C
 
 /* ---IMPLEMENTATIONS--- */
 
+void renderGame(SDL_Renderer *renderer, const game_t *game) {
 
+}
 #endif //CCONNECT4_WINDOW_H
