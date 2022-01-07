@@ -14,27 +14,13 @@
 #define SCREEN_WIDTH 640
 #define SCREEN_HEIGHT 480
 
-void catchPollEvent(SDL_Event e, int* quit);
 void renderGame(SDL_Renderer *renderer, const game_t *game);
-
+void renderGrid(SDL_Renderer *renderer, const SDL_Color *color);
+void renderBoard(SDL_Renderer *renderer, const int **board, const SDL_Color *colorPlayerY, const SDL_Color *colorPlayerR);
+void renderRunningState(SDL_Renderer *renderer, const game_t *game);
+void renderGameOverState(SDL_Renderer *renderer, const game_t *game, const SDL_Color *color);
 
 /* ---IMPLEMENTATIONS--- */
 
-void catchPollEvent(SDL_Event e, int* quit) {
-    while (SDL_PollEvent(&e)) {
-        switch (e.type) {
-            case SDL_QUIT:
-                *quit = 1;
-                break;
-
-            default: {
-            }
-        }
-    }
-}
-
-void renderGame(SDL_Renderer *renderer, const game_t *game) {
-
-}
 
 #endif //CCONNECT4_WINDOW_H
