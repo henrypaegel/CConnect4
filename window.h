@@ -7,7 +7,7 @@
 
 #include "game.h"
 #include <SDL2/SDL.h>
-
+#include <SDL2/SDL2_gfxPrimitives.h>
 
 /* ---DEFINITIONS--- */
 
@@ -74,10 +74,11 @@ void renderGrid(SDL_Renderer *renderer, const SDL_Color *color, const SDL_Color 
     SDL_RenderFillRect(renderer, board);
     free(board);
 
-    SDL_SetRenderDrawColor(renderer, colorBackground->r, colorBackground->g, colorBackground->b, 255);
+    //SDL_SetRenderDrawColor(renderer, colorBackground->r, colorBackground->g, colorBackground->b, 255);
     for(int i = 1; i <= COLUMNS; i++) {
         for(int j = 1; j <= ROWS; j++) {
-            filledCircle(renderer, i * CELL_EDGE - 0.5 * CELL_EDGE, j * CELL_EDGE + 0.5 * CELL_EDGE, 0.9 * 0.5 * SCREEN_PITCH);
+            //filledCircle(renderer, i * CELL_EDGE - 0.5 * CELL_EDGE, j * CELL_EDGE + 0.5 * CELL_EDGE, 0.9 * 0.5 * SCREEN_PITCH);
+            filledCircleRGBA(renderer, i * CELL_EDGE - 0.5 * CELL_EDGE, j * CELL_EDGE + 0.5 * CELL_EDGE, 0.9 * 0.5 * SCREEN_PITCH, colorBackground->r, colorBackground->g, colorBackground->b, 255);
         }
     }
 }
@@ -87,15 +88,15 @@ void renderBoard(SDL_Renderer *renderer, const uint8_t board[ROWS][COLUMNS], con
         for(int i = 0; i < COLUMNS; i++) {
             switch (board[j][i]) {
                 case PLAYER_R:
-                    //renderR(renderer, i, j, colorPlayerR);
-                    SDL_SetRenderDrawColor(renderer, colorPlayerR->r, colorPlayerR->g, colorPlayerR->b, 255);
-                    filledCircle(renderer, i * CELL_EDGE + 0.5 * CELL_EDGE, j * CELL_EDGE + 1.5 * CELL_EDGE, 0.9 * 0.5 * SCREEN_PITCH);
+                    //SDL_SetRenderDrawColor(renderer, colorPlayerR->r, colorPlayerR->g, colorPlayerR->b, 255);
+                    //filledCircle(renderer, i * CELL_EDGE + 0.5 * CELL_EDGE, j * CELL_EDGE + 1.5 * CELL_EDGE, 0.9 * 0.5 * SCREEN_PITCH);
+                    filledCircleRGBA(renderer, i * CELL_EDGE + 0.5 * CELL_EDGE, j * CELL_EDGE + 1.5 * CELL_EDGE, 0.9 * 0.5 * SCREEN_PITCH, colorPlayerR->r, colorPlayerR->g, colorPlayerR->b, 255);
                     break;
 
                 case PLAYER_Y:
-                    //renderY(renderer, i, j, colorPlayerY);
-                    SDL_SetRenderDrawColor(renderer, colorPlayerY->r, colorPlayerY->g, colorPlayerY->b, 255);
-                    filledCircle(renderer, i * CELL_EDGE + 0.5 * CELL_EDGE, j * CELL_EDGE + 1.5 * CELL_EDGE, 0.9 * 0.5 * SCREEN_PITCH);
+                    //SDL_SetRenderDrawColor(renderer, colorPlayerY->r, colorPlayerY->g, colorPlayerY->b, 255);
+                    //filledCircle(renderer, i * CELL_EDGE + 0.5 * CELL_EDGE, j * CELL_EDGE + 1.5 * CELL_EDGE, 0.9 * 0.5 * SCREEN_PITCH);
+                    filledCircleRGBA(renderer, i * CELL_EDGE + 0.5 * CELL_EDGE, j * CELL_EDGE + 1.5 * CELL_EDGE, 0.9 * 0.5 * SCREEN_PITCH, colorPlayerY->r, colorPlayerY->g, colorPlayerY->b, 255);
                     break;
 
                 default: {}
