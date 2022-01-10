@@ -12,14 +12,13 @@
 /* ---DEFINITIONS--- */
 
 #define ROWS 6
-#define COLUMS 7
+#define COLUMNS 7
 #define PLAYER_Y 1
 #define PLAYER_R 2
-<<<<<<< Updated upstream
-=======
 #define CELL_EDGE (SCREEN_WIDTH / COLUMNS)
-
->>>>>>> Stashed changes
+#define COLUMN_WIDTH (SCREEN_WIDTH / COLUMNS)
+#define COLUMN_HEIGHT SCREEN_HEIGHT
+#define CELL_EDGE (SCREEN_WIDTH / COLUMNS)
 
 enum gameState {
     QUIT_STATE = 0,
@@ -35,7 +34,7 @@ enum cellState {
 };
 
 typedef struct {
-    uint8_t board[ROWS][COLUMS];
+    uint8_t board[ROWS][COLUMNS];
     uint8_t player;
     uint8_t state;
 } game_t;
