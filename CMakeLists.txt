@@ -8,6 +8,6 @@ include_directories(.)
 
 add_executable(CConnect4
         main.c
-        window.h game.h)
+        render.c render.h logic.c logic.h)
 
 target_link_libraries(CConnect4 SDL2main SDL2 SDL2_gfx)

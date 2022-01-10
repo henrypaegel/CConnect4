@@ -19,3 +19,17 @@
 - It’s fluently playable/reacts fluently to user input
 - Statistics of previous games can be stored in form of “highscores” and can be displayed to the user/player
 - The game has a menu with several options needed to access all functionality
+
+### Configurable Options:
+**logic.h**
+- ROWS, COLUMNS
+
+**render.h**
+- SCREEN_PITCH &rightarrow; correlation of pixels to edge-length of cells
+
+**render.c**
+- GRID_COLOR &rightarrow; blue crate
+- RED_COLOR &rightarrow; color-tone for red player
+- YELLOW_COLOR &rightarrow; color-tone for yellow player
+- TIE_COLOR &rightarrow; color for beam over crate (grey)
+- WHITE &rightarrow; white-tone for background and beam
