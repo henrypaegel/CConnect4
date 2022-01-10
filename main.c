@@ -25,6 +25,7 @@ int main(int argc, char **argv) {
         return EXIT_FAILURE;
     }
 
+<<<<<<< Updated upstream
     game_t game = {
         .board = {{EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY},
                   {EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY},
@@ -38,17 +39,22 @@ int main(int argc, char **argv) {
 
     const float columnWidth = SCREEN_WIDTH / COLUMNS;
     const float columnHeight = SCREEN_HEIGHT;
+=======
+    // swap with function to reset game;
+    game_t *game = (game_t*) malloc(sizeof(game_t));
+    resetGame(game);
+>>>>>>> Stashed changes
 
     SDL_Event e;
-    while (game.state) {
+    while (game->state) {
         while (SDL_PollEvent(&e)) {
             switch (e.type) {
                 case SDL_QUIT:
-                    game.state = QUIT_STATE;
+                    game->state = QUIT_STATE;
                     break;
 
                 case SDL_MOUSEBUTTONDOWN:
-                    clickedOnColumn(&game, e.button.y / columnHeight, e.button.x / columnWidth);
+                    clickedOnColumn(game, e.button.x / CELL_EDGE);
                     break;
 
                 default: {}
@@ -57,12 +63,13 @@ int main(int argc, char **argv) {
 
         SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
         SDL_RenderClear(renderer);
-        renderGame(renderer, &game);
+        renderGame(renderer, game);
         SDL_RenderPresent(renderer);
     }
 
     SDL_DestroyWindow(window);
     SDL_Quit();
+    free(game);
 
     return EXIT_SUCCESS;
 }
