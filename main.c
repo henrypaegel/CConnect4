@@ -25,25 +25,10 @@ int main(int argc, char **argv) {
         return EXIT_FAILURE;
     }
 
-<<<<<<< Updated upstream
-    game_t game = {
-        .board = {{EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY},
-                  {EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY},
-                  {EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY},
-                  {EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY},
-                  {EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY},
-                  {EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY}},
-        .player = PLAYER_Y,
-        .state = RUNNING_STATE
-    };
-
-    const float columnWidth = SCREEN_WIDTH / COLUMNS;
-    const float columnHeight = SCREEN_HEIGHT;
-=======
     // swap with function to reset game;
     game_t *game = (game_t*) malloc(sizeof(game_t));
     resetGame(game);
->>>>>>> Stashed changes
+
 
     SDL_Event e;
     while (game->state) {
