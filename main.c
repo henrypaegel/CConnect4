@@ -13,7 +13,7 @@ int main(int argc, char **argv) {
     }
 
     SDL_Window *window = SDL_CreateWindow("CConnect4", 100, 100, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
-    if (window == 0) {
+    if (!window) {
         printf("SDL_CreateWindow Error: %s\n", SDL_GetError());
         return EXIT_FAILURE;
     }
@@ -36,8 +36,7 @@ int main(int argc, char **argv) {
         .state = RUNNING_STATE
     };
 
-
-    const float columnWidth = SCREEN_WIDTH / COLUMS;
+    const float columnWidth = SCREEN_WIDTH / COLUMNS;
     const float columnHeight = SCREEN_HEIGHT;
 
     SDL_Event e;
@@ -56,7 +55,7 @@ int main(int argc, char **argv) {
             }
         }
 
-        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
         SDL_RenderClear(renderer);
         renderGame(renderer, &game);
         SDL_RenderPresent(renderer);
