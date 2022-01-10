@@ -37,8 +37,11 @@ typedef struct {
 } game_t;
 
 void switchPlayer(game_t *game);
+int checkPlayerWon(game_t *game, uint8_t player);
 void playerTurn(game_t *game, int row, int column);
 void resetGame(game_t *game);
+int countCells(const uint8_t board[ROWS][COLUMNS], uint8_t cell);
+void gameOverCondition(game_t *game);
 void clickedOnColumn(game_t *game, int column);
 
 /* ---IMPLEMENTATIONS--- */
@@ -51,10 +54,36 @@ void switchPlayer(game_t *game) {
     }
 }
 
+int countCells(const uint8_t board[ROWS][COLUMNS], uint8_t cell) {
+    int count = 0;
+    for(int i = 0; i < ROWS; i++) {
+        for(int j = 0; j < COLUMNS; j++) {
+            if(board[i][j] == cell) count++;
+        }
+    }
+    return count;
+} // count specific values on grid
+
+int checkPlayerWon(game_t *game, uint8_t player) {
+    //TODO: implement check for four in row
+    return 0;
+}
+
+void gameOverCondition(game_t *game) {
+    if(checkPlayerWon(game, PLAYER_Y)) {
+        game->state = PLAYER_Y_WON_STATE;
+    } else if(checkPlayerWon(game, PLAYER_R)) {
+        game->state = PLAYER_R_WON_STATE;
+    } else if(!countCells(game->board, EMPTY)) {
+        game->state = TIE_STATE;
+    }
+}
+
 void playerTurn(game_t *game, int row, int column) {
     if (game->board[row][column] == EMPTY) {
         game->board[row][column] = game->player;
         switchPlayer(game);
+        gameOverCondition(game); //checks if game state changes after move by player
     }
 }
 
@@ -70,16 +99,11 @@ void resetGame(game_t *game) {
 
 void clickedOnColumn(game_t *game, int column) {
     if(game->state == RUNNING_STATE) {
-        int validTurn = 0;
         for(int i = ROWS-1; i >= 0; i--) {
             if(game->board[i][column] == EMPTY) {
                 playerTurn(game, i, column);
-                validTurn = 1;
                 break;
             }
-        }
-        if(!validTurn) {
-            // aktuell noch Pech :P
         }
     } else {
         resetGame(game);
