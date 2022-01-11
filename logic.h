@@ -36,12 +36,17 @@ typedef struct {
     uint8_t state;
 } game_t; // game-structure containing current board layout, player with next turn, game state.
 
+typedef struct {
+    uint8_t row;
+    uint8_t column;
+} cell;
+
 void switchPlayer(game_t *game);
-int checkPlayerWon(game_t *game, uint8_t player);
-void playerTurn(game_t *game, int row, int column);
+int checkPlayerWon(game_t *game, uint8_t player, cell *newPiece);
+void playerTurn(game_t *game, cell *newPiece);
 void resetGame(game_t *game);
 int countCells(const uint8_t board[ROWS][COLUMNS], uint8_t cell);
-void gameOverCondition(game_t *game);
+void gameOverCondition(game_t *game, cell *newPiece);
 void clickedOnColumn(game_t *game, int column);
 
 #endif //CCONNECT4_LOGIC_H
