@@ -16,7 +16,15 @@ const SDL_Color WHITE = { .r = 255, .g = 255, .b = 255 };
 
 void renderBar(SDL_Renderer *renderer, const SDL_Color *color) {
     SDL_SetRenderDrawColor(renderer, color->r, color->g, color->b, 255);
-    SDL_RenderClear(renderer);
+
+    SDL_Rect *board;
+    board = (SDL_Rect*) malloc(sizeof(SDL_Rect));
+    board->x = 0;
+    board->y = 0;
+    board->w = SCREEN_WIDTH;
+    board->h = CELL_EDGE;
+    SDL_RenderFillRect(renderer, board);
+    free(board);
 } // renders whole background-color
 
 //TODO: streamline rendering of grid; don't re-draw what is already there
@@ -66,7 +74,8 @@ void renderRunningState(SDL_Renderer *renderer, const game_t *game) {
 
 void renderGameOverState(SDL_Renderer *renderer, const game_t *game, const SDL_Color *color) {
     renderBar(renderer, color);
-    renderGrid(renderer, &GRID_COLOR, color);
+    renderGrid(renderer, &GRID_COLOR, &TIE_COLOR
+    );
     renderBoard(renderer, game->board, &YELLOW_COLOR, &RED_COLOR);
 } // renders background, then crate with white pieces and lastly actual colored pieces
 
