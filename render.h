@@ -21,11 +21,19 @@ extern const SDL_Color YELLOW_COLOR;
 extern const SDL_Color TIE_COLOR;
 extern const SDL_Color WHITE;
 
+int renderHovering(SDL_Renderer *renderer, int column);
+
 void renderBar(SDL_Renderer *renderer, const SDL_Color *color);
+
 void renderGame(SDL_Renderer *renderer, const game_t *game);
+
 void renderGrid(SDL_Renderer *renderer, const SDL_Color *color, const SDL_Color *colorBackground);
-void renderBoard(SDL_Renderer *renderer, const uint8_t board[ROWS][COLUMNS], const SDL_Color *colorPlayerY, const SDL_Color *colorPlayerR);
+
+void renderBoard(SDL_Renderer *renderer, const uint8_t board[ROWS][COLUMNS], const SDL_Color *colorPlayerY,
+                 const SDL_Color *colorPlayerR);
+
 void renderRunningState(SDL_Renderer *renderer, const game_t *game);
+
 void renderGameOverState(SDL_Renderer *renderer, const game_t *game, const SDL_Color *color);
 
 #endif //CCONNECT4_RENDER_H

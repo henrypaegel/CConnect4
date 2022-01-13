@@ -42,11 +42,19 @@ typedef struct {
 } cell;
 
 void switchPlayer(game_t *game);
+
 int checkPlayerWon(game_t *game, uint8_t player, cell *newPiece);
+
 void playerTurn(game_t *game, cell *newPiece);
+
 void resetGame(game_t *game);
+
 int countCells(const uint8_t board[ROWS][COLUMNS], uint8_t cell);
+
+int checkShift(game_t *game, uint8_t player, int r, int c, int rShift, int cShift, int countFour);
+
 void gameOverCondition(game_t *game, cell *newPiece);
-void clickedOnColumn(game_t *game, int column);
+
+void clickedOnColumn(game_t *game, int column, int row);
 
 #endif //CCONNECT4_LOGIC_H
