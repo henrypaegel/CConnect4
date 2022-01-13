@@ -26,31 +26,34 @@ int countCells(const uint8_t board[ROWS][COLUMNS], const uint8_t cell) {
 } // count specific values on the grid
 
 int checkShift(game_t *game, uint8_t player, int r, int c, int rShift, int cShift, int countFour) {
-    if (r+rShift < 0 || r+rShift >= ROWS || c+cShift < 0 || c+cShift >= COLUMNS) return 0; // outside grid
+    if (r+rShift < 0 || r+rShift >= ROWS || c+cShift < 0 || c+cShift >= COLUMNS) return countFour; // outside grid
     if (countFour < 4) {
         if (game->board[r + rShift][c + cShift] == player) {
             countFour++;
             return checkShift(game, player, r + rShift, c + cShift, rShift, cShift, countFour);
         } else {
-            return 0;
+            return countFour;
         }
-    } else if(countFour == 4) {
-        return 1;
     }
+    return countFour;
 }
 
 int checkPlayerWon(game_t *game, uint8_t player, cell *newPiece) {
-    //TODO: implement check for four in row
-    int countFour = 0;
     if (game->board[newPiece->row][newPiece->column] == player) {
+        int countFour = 1;
+
+        countFour = checkShift(game, player, newPiece->row, newPiece->column, -1, 0,countFour);
+        if(countFour >= 4) return 1; //TODO: maybe use ==
+        countFour = checkShift(game, player, newPiece->row, newPiece->column, 1, 0, countFour);
+        if(countFour >= 4) return 1; //TODO: maybe use ==
         countFour = 1;
+
         for(int i = -1; i < 2; i++) {
-            for(int j = -1; j < 2; j++) {
-                if(i == 0 && j == 0) continue;
-                int leadSolution = checkShift(game, player, newPiece->row, newPiece->column, i, j, countFour);
-                if(leadSolution) return 1;
-                countFour = 1;
-            }
+            countFour = checkShift(game, player, newPiece->row, newPiece->column, i, 1,countFour);
+            if(countFour >= 4) return 1; //TODO: maybe use ==
+            countFour = checkShift(game, player, newPiece->row, newPiece->column, i*-1, -1, countFour);
+            if(countFour >= 4) return 1; //TODO: maybe use ==
+            countFour = 1;
         }
     }
 
@@ -70,13 +73,13 @@ void gameOverCondition(game_t *game, cell *newPiece) {
 void playerTurn(game_t *game, cell *newPiece) {
     if (game->board[newPiece->row][newPiece->column] == EMPTY) {
         game->board[newPiece->row][newPiece->column] = game->player; // hard-set new move
-        switchPlayer(game); // prepare next turn
         gameOverCondition(game, newPiece); // catch game-state-change
+        switchPlayer(game); // prepare next turn
     }
 } // player makes a move; new board-layout is checked against game-state-change
 
 void resetGame(game_t *game) {
-    game->player = RED;
+    game->player = RED; //TODO: eventuell vom Nutzer zu wählen
     game->state = RUNNING_STATE;
     for(int i = 0; i < ROWS; i++) {
         for(int j = 0; j < COLUMNS; j++) {
