@@ -33,6 +33,7 @@ int main(int argc, char **argv) {
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
     SDL_RenderClear(renderer);
 
+    srand(time(NULL));   // Initialization, should only be called once.
 
     // game loop driven by SDL_Event to react on user input
     SDL_Event e;

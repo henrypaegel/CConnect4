@@ -13,6 +13,13 @@ void switchPlayer(game_t *game) {
     } else if(game->player == YELLOW) {
         game->player = RED;
     }
+
+    if(AI_GAME && game->aiTurn) {
+        game->aiTurn = FALSE;
+    } else if(AI_GAME) {
+        game->aiTurn = TRUE;
+    }
+
 } // set player with next turn to opposite player
 
 int countCells(const uint8_t board[ROWS][COLUMNS], const uint8_t cell) {
@@ -70,15 +77,37 @@ void gameOverCondition(game_t *game, cell *newPiece) {
     }
 } // run checks to change game-state if necessary and catch end of game
 
+int findEmptyRow(game_t* game, int column) {
+    for (int i = ROWS - 1; i >= 0; i--) { // iterate from bottom to top on chosen column
+        if(game->board[i][column] == EMPTY) return i;
+    }
+    return -1;
+}
+
+void computerTurn(game_t *game) {
+    if(AI_MODE == EASY) {
+        int row = -1;
+        int column;
+        while(row == -1) {
+            column = rand()%6;
+            row = findEmptyRow(game, column);
+        }
+        cell newPiece = {.row = row, .column = column};
+        playerTurn(game, &newPiece);
+    }
+}
+
 void playerTurn(game_t *game, cell *newPiece) {
     game->board[newPiece->row][newPiece->column] = game->player; // hard-set new move
     gameOverCondition(game, newPiece); // catch game-state-change
     switchPlayer(game); // prepare next turn
+    if(game->aiTurn && game->state == RUNNING_STATE) computerTurn(game);
 } // player makes a move; new board-layout is checked against game-state-change
 
 void resetGame(game_t *game) {
     game->player = RED; //TODO: eventuell vom Nutzer zu wählen
     game->state = RUNNING_STATE;
+    game->aiTurn = FALSE;
     for (int i = 0; i < ROWS; i++) {
         for (int j = 0; j < COLUMNS; j++) {
             game->board[i][j] = EMPTY;
@@ -92,7 +121,9 @@ void clickedOnColumn(game_t *game, int column, int row) {
         for (int i = ROWS - 1; i >= 0; i--) { // iterate from bottom to top on chosen column
             if(game->board[i][column] == EMPTY) { // check if column has at least one empty cell
                 cell newPiece = {.row = i, .column = column};
-                playerTurn(game, &newPiece);
+                if(!game->aiTurn)  {
+                    playerTurn(game, &newPiece);
+                }
                 break;
             }
         }
