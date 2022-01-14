@@ -6,9 +6,9 @@
 #define CCONNECT4_LOGIC_H
 
 #include <stdint.h>
-#include <time.h>
+#include <string.h>
 #include <stdlib.h>
-
+#include <time.h>
 
 /* ---DEFINITIONS--- */
 
@@ -18,7 +18,7 @@
 #define FALSE 0
 
 #define AI_GAME 1
-#define AI_MODE EASY
+#define AI_MODE MEDIUM
 
 //TODO: check whether CELL_EDGE is equivalent to SCREEN_PITCH
 #define CELL_EDGE (SCREEN_WIDTH / COLUMNS) // size of square of cells on the board
