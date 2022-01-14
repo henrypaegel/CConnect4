@@ -6,15 +6,28 @@
 #define CCONNECT4_LOGIC_H
 
 #include <stdint.h>
+#include <time.h>
+#include <stdlib.h>
 
 
 /* ---DEFINITIONS--- */
 
 #define ROWS 6
 #define COLUMNS 7
+#define TRUE 1
+#define FALSE 0
+
+#define AI_GAME 1
+#define AI_MODE EASY
 
 //TODO: check whether CELL_EDGE is equivalent to SCREEN_PITCH
 #define CELL_EDGE (SCREEN_WIDTH / COLUMNS) // size of square of cells on the board
+
+enum aiMode {
+    EASY = 0,
+    MEDIUM = 1,
+    HARD = 2,
+};
 
 enum gameState {
     QUIT_STATE = 0,
@@ -34,14 +47,30 @@ typedef struct {
     uint8_t board[ROWS][COLUMNS];
     uint8_t player;
     uint8_t state;
+    uint8_t aiTurn;
 } game_t; // game-structure containing current board layout, player with next turn, game state.
 
+typedef struct {
+    uint8_t row;
+    uint8_t column;
+} cell;
+
 void switchPlayer(game_t *game);
-int checkPlayerWon(game_t *game, uint8_t player);
-void playerTurn(game_t *game, int row, int column);
+
+int checkPlayerWon(game_t *game, uint8_t player, cell *newPiece);
+
+void playerTurn(game_t *game, cell *newPiece);
+
+void computerTurn(game_t *game);
+
 void resetGame(game_t *game);
+
 int countCells(const uint8_t board[ROWS][COLUMNS], uint8_t cell);
-void gameOverCondition(game_t *game);
-void clickedOnColumn(game_t *game, int column);
+
+int checkShift(game_t *game, uint8_t player, int r, int c, int rShift, int cShift, int countFour);
+
+void gameOverCondition(game_t *game, cell *newPiece);
+
+void clickedOnColumn(game_t *game, int column, int row);
 
 #endif //CCONNECT4_LOGIC_H
