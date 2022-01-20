@@ -5,10 +5,13 @@
 #ifndef CCONNECT4_LOGIC_H
 #define CCONNECT4_LOGIC_H
 
+#include <stdio.h>
 #include <stdint.h>
 #include <string.h>
 #include <stdlib.h>
 #include <time.h>
+#include <unistd.h> //you need this for linux!
+
 
 /* ---DEFINITIONS--- */
 
@@ -40,7 +43,7 @@ enum gameState {
 enum cellState {
     EMPTY = 0,
     YELLOW = 1,
-    RED = 2
+    RED = 2,
 }; // all possible states a cell on the board can have
 
 typedef struct {
@@ -48,6 +51,7 @@ typedef struct {
     uint8_t player;
     uint8_t state;
     uint8_t aiTurn;
+    int moves;
 } game_t; // game-structure containing current board layout, player with next turn, game state.
 
 typedef struct {

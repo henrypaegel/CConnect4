@@ -4,8 +4,21 @@
 
 #include "logic.h"
 
+time_t start, end;
 
 /* ---IMPLEMENTATIONS--- */
+
+int movesToWin(int movesTotal) {
+    int overflow = movesTotal % 2;
+    movesTotal /= 2;
+    return movesTotal + overflow;
+}
+
+int oppositePlayer(uint8_t player) {
+    if(player == 1) return 2;
+    if(player == 2) return 1;
+    return player;
+}
 
 void switchPlayer(game_t *game) {
     if(game->player == RED) {
@@ -70,10 +83,16 @@ int checkPlayerWon(game_t *game, uint8_t player, cell *newPiece) {
 void gameOverCondition(game_t *game, cell *newPiece) {
     if(checkPlayerWon(game, YELLOW, newPiece)) {
         game->state = YELLOW_WON_STATE;
+        time(&end);
+        printf("took yellow %fs and %dmoves\n", difftime(end, start), movesToWin(game->moves));
     } else if(checkPlayerWon(game, RED, newPiece)) {
         game->state = RED_WON_STATE;
+        time(&end);
+        printf("took red %fs and %dmoves\n", difftime(end, start), movesToWin(game->moves));
     } else if(!countCells(game->board, EMPTY)) { // no empty cells left
         game->state = TIE_STATE;
+        time(&end);
+        printf("tie after %fs and %dmoves\n", difftime(end, start), movesToWin(game->moves));
     }
 } // run checks to change game-state if necessary and catch end of game
 
@@ -84,10 +103,10 @@ int findEmptyRow(game_t* game, int column) {
     return -1;
 }
 
-int countInWindow(uint8_t row[], uint8_t cell, int offset) {
+int countInWindow(const uint8_t window[], const uint8_t cell, int offset) {
     int count = 0;
     for (int i = 0; i < 4; i++) {
-        if(row[i+offset] == cell) count++; // compare currently viewed cell against reference
+        if(window[i+offset] == cell) count++; // compare currently viewed cell against reference
     }
     return count;
 }
@@ -95,20 +114,48 @@ int countInWindow(uint8_t row[], uint8_t cell, int offset) {
 int scoreAxis(int length, uint8_t axis[length], uint8_t player) {
     // Look through every window of four in every row and assign scores to different formations.
     int score = 0;
-    for (int offset = 0; offset < length - 4; offset++) {
+    for (int offset = 0; offset < length - 3; offset++) {
         if(countInWindow(axis, player, offset) == 4) {
             score += 100;
         } else if(countInWindow(axis, player, offset) == 3 && countInWindow(axis, EMPTY, offset) == 1) {
-            score += 10;
-        } else if(countInWindow(axis, player, offset) == 2 && countInWindow(axis, EMPTY, offset) == 2) {
             score += 5;
+        } else if(countInWindow(axis, player, offset) == 2 && countInWindow(axis, EMPTY, offset) == 2) {
+            score += 2;
+        } else if(countInWindow(axis, oppositePlayer(player), offset) == 4) {
+            score -= 80;
+        } else if(countInWindow(axis, oppositePlayer(player), offset) == 3 && countInWindow(axis, EMPTY, offset) == 1) {
+            score -= 10;
         }
     }
     return score;
 }
 
+void getDiagonal(const uint8_t board[][COLUMNS], uint8_t window[], int startR, int startC) {
+    for (int i = 0; i < 6; i++) {
+        if(startR+i < 0 || startR+i >= ROWS || startC+i < 0 || startC+i >= COLUMNS) {
+            window[i] = -1;
+        } else {
+            window[i] = board[startR+i][startC+i];
+        }
+    }
+}
+
 int scoreBoard(const uint8_t board[][COLUMNS], cell piece, uint8_t player) {
     int score = 0;
+
+    //center column
+    uint8_t center[ROWS];
+    for (int r = 0; r < ROWS; r++) {
+        // fill row-array with data from game and pretend testMove was done.
+        if(piece.row == r && piece.column == 3) {
+            center[r] = player;
+        } else {
+            center[r] = board[r][3];
+        }
+        // Look through every window of four in every row and assign scores to different formations.
+    }
+    score += countInWindow(center, player, 0) * 3;
+
 
     //check horizontal score
     uint8_t row[COLUMNS];
@@ -121,7 +168,6 @@ int scoreBoard(const uint8_t board[][COLUMNS], cell piece, uint8_t player) {
                 row[i] = board[r][i];
             }
         }
-
         // Look through every window of four in every row and assign scores to different formations.
         score += scoreAxis(COLUMNS, row, player);
     }
@@ -137,11 +183,35 @@ int scoreBoard(const uint8_t board[][COLUMNS], cell piece, uint8_t player) {
                 column[i] = board[i][c];
             }
         }
-
         // Look through every window of four in every row and assign scores to different formations.
         score += scoreAxis(ROWS, column, player);
     }
 
+    //check diagonal score
+    uint8_t diagonal[6];
+
+    // left-leaning (negative slope)
+    for (int r = 2; r >= 0; r--) {
+        getDiagonal(board, diagonal, r, 0);
+        score += scoreAxis(6, diagonal, player);
+    }
+    for (int c = 0; c <= 3; c++) {
+        getDiagonal(board, diagonal, 0, c);
+        score += scoreAxis(6, diagonal, player);
+    }
+    // right-leaning (positive slope)
+    for (int c = 3; c <= 6; c++) {
+        getDiagonal(board, diagonal, 0, c);
+        score += scoreAxis(6, diagonal, player);
+    }
+    for (int r = 1; r <= 2; r++) {
+        getDiagonal(board, diagonal, r, 6);
+        score += scoreAxis(6, diagonal, player);
+    }
+
+
+
+    //TODO: add weighting of columns
     return score;
 }
 
@@ -192,6 +262,7 @@ void computerTurn(game_t *game) {
 
 void playerTurn(game_t *game, cell *newPiece) {
     game->board[newPiece->row][newPiece->column] = game->player; // hard-set new move
+    game->moves++;
     gameOverCondition(game, newPiece); // catch game-state-change
     switchPlayer(game); // prepare next turn
     if(game->aiTurn && game->state == RUNNING_STATE) computerTurn(game);
@@ -200,13 +271,15 @@ void playerTurn(game_t *game, cell *newPiece) {
 void resetGame(game_t *game) {
     game->player = YELLOW; //TODO: eventuell vom Nutzer zu wählen
     game->state = RUNNING_STATE;
-    game->aiTurn = TRUE;
+    game->aiTurn = FALSE; //TODO: let user decide if game starts with ai or not (also assigns color to ai)
     for (int i = 0; i < ROWS; i++) {
         for (int j = 0; j < COLUMNS; j++) {
             game->board[i][j] = EMPTY;
         }
     }
     if(game->aiTurn) computerTurn(game);
+    game->moves = 0;
+    time(&start);
 } // (re)set board as well as other game-attributes to their initial values
 
 void clickedOnColumn(game_t *game, int column, int row) {
