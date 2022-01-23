@@ -7,6 +7,7 @@
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL2_gfxPrimitives.h>
+#include <SDL2/SDL_ttf.h>
 #include "logic.h"
 
 
@@ -21,18 +22,15 @@ extern const SDL_Color YELLOW_COLOR;
 extern const SDL_Color TIE_COLOR;
 extern const SDL_Color WHITE;
 
-int renderHovering(SDL_Renderer *renderer, int column);
+int renderHovering(SDL_Renderer *renderer, const int column, const game_t *game);
 
-void renderBar(SDL_Renderer *renderer, const SDL_Color *color);
+void renderBar(SDL_Renderer *renderer, const SDL_Color *color, const game_t *game);
 
 void renderGame(SDL_Renderer *renderer, const game_t *game);
 
-void renderGrid(SDL_Renderer *renderer, const SDL_Color *color, const SDL_Color *colorBackground);
+void renderGrid(SDL_Renderer *renderer);
 
-void renderBoard(SDL_Renderer *renderer, const uint8_t board[ROWS][COLUMNS], const SDL_Color *colorPlayerY,
-                 const SDL_Color *colorPlayerR);
-
-void renderRunningState(SDL_Renderer *renderer, const game_t *game);
+void renderBoard(SDL_Renderer *renderer, const game_t *game);
 
 void renderGameOverState(SDL_Renderer *renderer, const game_t *game, const SDL_Color *color);
 

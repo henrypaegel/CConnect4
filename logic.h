@@ -47,17 +47,22 @@ enum cellState {
 }; // all possible states a cell on the board can have
 
 typedef struct {
+    uint8_t row;
+    uint8_t column;
+} cell;
+
+typedef struct {
     uint8_t board[ROWS][COLUMNS];
+    cell newPiece;
     uint8_t player;
     uint8_t state;
     uint8_t aiTurn;
     int moves;
 } game_t; // game-structure containing current board layout, player with next turn, game state.
 
-typedef struct {
-    uint8_t row;
-    uint8_t column;
-} cell;
+double getTime();
+
+int movesToWin(int movesTotal);
 
 void switchPlayer(game_t *game);
 

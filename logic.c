@@ -6,7 +6,13 @@
 
 time_t start, end;
 
+
 /* ---IMPLEMENTATIONS--- */
+
+double getTime() {
+    time(&end);
+    return difftime(end, start);
+}
 
 int movesToWin(int movesTotal) {
     int overflow = movesTotal % 2;
@@ -210,8 +216,6 @@ int scoreBoard(const uint8_t board[][COLUMNS], cell piece, uint8_t player) {
     }
 
 
-
-    //TODO: add weighting of columns
     return score;
 }
 
@@ -247,6 +251,17 @@ int pickBestColumn(const game_t *game, const uint8_t player) {
     return bestColumn;
 }
 
+int isLastNode(game_t *game, cell *newPiece) {
+    return  checkPlayerWon(game, YELLOW, newPiece) ||
+            checkPlayerWon(game, RED, newPiece) ||
+            !countCells(game->board, EMPTY);
+}
+
+void minimax(game_t *game, int depth, int alpha, int beta, uint8_t maximizingPlayer) {
+    //int lastNode = isLastNode(game, );
+}
+
+
 void computerTurn(game_t *game) {
     if(AI_MODE == EASY) {
         int column = randomLegalColumn(game);
@@ -260,12 +275,16 @@ void computerTurn(game_t *game) {
     }
 }
 
-void playerTurn(game_t *game, cell *newPiece) {
+void makeMove(game_t *game, cell *newPiece) {
     game->board[newPiece->row][newPiece->column] = game->player; // hard-set new move
+    game->newPiece = *newPiece;
     game->moves++;
+}
+
+void playerTurn(game_t *game, cell *newPiece) {
+    makeMove(game, newPiece);
     gameOverCondition(game, newPiece); // catch game-state-change
     switchPlayer(game); // prepare next turn
-    if(game->aiTurn && game->state == RUNNING_STATE) computerTurn(game);
 } // player makes a move; new board-layout is checked against game-state-change
 
 void resetGame(game_t *game) {
