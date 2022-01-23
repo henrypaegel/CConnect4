@@ -6,7 +6,7 @@
 #define CCONNECT4_LOGIC_H
 
 #include <stdio.h>
-#include <stdint.h
+#include <stdint.h>
 #include <string.h>
 #include <stdlib.h>
 #include <time.h>
