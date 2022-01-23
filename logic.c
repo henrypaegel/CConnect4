@@ -9,11 +9,6 @@ time_t start, end;
 
 /* ---IMPLEMENTATIONS--- */
 
-double getTime() {
-    time(&end);
-    return difftime(end, start);
-}
-
 int movesToWin(int movesTotal) {
     int overflow = movesTotal % 2;
     movesTotal /= 2;
@@ -86,19 +81,42 @@ int checkPlayerWon(game_t *game, uint8_t player, cell *newPiece) {
     return 0;
 } // run checks to catch four in a row :)
 
+
+int checkHighscore (const game_t *game, enum cellState player) {
+    //compare the score to other highscores
+    //if new highstore --> return 1 and save it
+    //if not return 0
+
+    int maxchar = 20;
+    FILE *fRead = fopen("highscore.csv", "r");
+    char row[maxchar];
+
+    if(fRead == NULL) {
+        printf("Couldn't open file!");
+        return -1;
+    } else {
+        char metrics[10];
+        time(&end);
+        sprintf(metrics, "%.2d,%.2lf,%d", movesToWin(game->moves), difftime(end, start), player);
+        if(!feof(fRead)) fgets(row, maxchar, fRead);
+        if(strcmp(metrics, row) < 0) {
+            FILE *fOverwrite = fopen("highscore.csv", "w+");
+            fputs(metrics, fOverwrite);
+            return 1;
+        }
+        return 0;
+    }
+}
+
 void gameOverCondition(game_t *game, cell *newPiece) {
     if(checkPlayerWon(game, YELLOW, newPiece)) {
         game->state = YELLOW_WON_STATE;
-        time(&end);
-        printf("took yellow %fs and %dmoves\n", difftime(end, start), movesToWin(game->moves));
+        checkHighscore(game, YELLOW);
     } else if(checkPlayerWon(game, RED, newPiece)) {
         game->state = RED_WON_STATE;
-        time(&end);
-        printf("took red %fs and %dmoves\n", difftime(end, start), movesToWin(game->moves));
+        checkHighscore(game, RED);
     } else if(!countCells(game->board, EMPTY)) { // no empty cells left
         game->state = TIE_STATE;
-        time(&end);
-        printf("tie after %fs and %dmoves\n", difftime(end, start), movesToWin(game->moves));
     }
 } // run checks to change game-state if necessary and catch end of game
 
@@ -290,7 +308,7 @@ void playerTurn(game_t *game, cell *newPiece) {
 
 void resetGame(game_t *game) {
     game->player = YELLOW; //TODO: eventuell vom Nutzer zu wählen
-    game->state = RUNNING_STATE;
+    game->state = MENU_STATE;
     game->aiTurn = FALSE; //TODO: let user decide if game starts with ai or not (also assigns color to ai)
     for (int i = 0; i < ROWS; i++) {
         for (int j = 0; j < COLUMNS; j++) {

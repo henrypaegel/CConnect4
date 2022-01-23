@@ -6,6 +6,19 @@
 #include "render.h"
 
 
+int clickedButton(SDL_Event *e) {
+    if(e->button.x >= 240 && e->button.x <= 460) {
+        if(e->button.y >= 232 && e->button.y <= 292) {
+            return 1;
+        } else if(e->button.y >= 324 && e->button.y <= 384) {
+            return 2;
+        } else if(e->button.y >= 416 && e->button.y <= 476) {
+            return 3;
+        }
+    }
+    return 0;
+}
+
 int main(int argc, char **argv) {
     if(SDL_Init(SDL_INIT_VIDEO)) {
         printf("Could not initialize sdl2: %s\n", SDL_GetError());
@@ -38,6 +51,7 @@ int main(int argc, char **argv) {
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
     SDL_RenderClear(renderer);
     renderGrid(renderer);
+    renderMenu(renderer);
     SDL_RenderPresent(renderer);
 
 
@@ -54,20 +68,38 @@ int main(int argc, char **argv) {
                     break;
 
                 case SDL_MOUSEBUTTONDOWN:
-                    clickedOnColumn(game, e.button.x / CELL_EDGE, e.button.y / CELL_EDGE);
-                    renderGame(renderer, game);
-                    SDL_RenderPresent(renderer);
+                    //TODO: test if menu was clicked
+                    if(game->state == MENU_STATE) {
+                        switch (clickedButton(&e)) {
+                            case 1:
+                                resetGame(game);
+                                game->state = RUNNING_STATE;
+                                break;
 
-                    if(game->aiTurn && game->state == RUNNING_STATE) {
-                        computerTurn(game);
-                        sleep(1);
-                        renderGame(renderer, game);
-                        SDL_RenderPresent(renderer);
+                            case 2:
+                                break;
+
+                            case 3:
+                                game->state = QUIT_STATE;
+                                break;
+                        }
                     }
-
-                    if(!game->state) {
+                    if(game->state) {
+                        clickedOnColumn(game, e.button.x / CELL_EDGE, e.button.y / CELL_EDGE);
                         renderGame(renderer, game);
                         SDL_RenderPresent(renderer);
+
+                        if(game->aiTurn && game->state == RUNNING_STATE) {
+                            computerTurn(game);
+                            sleep(1);
+                            renderGame(renderer, game);
+                            SDL_RenderPresent(renderer);
+                        }
+
+                        if(!game->state) {
+                            renderGame(renderer, game);
+                            SDL_RenderPresent(renderer);
+                        }
                     }
 
                     break;

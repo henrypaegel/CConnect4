@@ -10,6 +10,7 @@ const SDL_Color RED_COLOR = {.r = 180, .g = 0, .b = 0};
 const SDL_Color YELLOW_COLOR = {.r = 230, .g = 180, .b = 20};
 const SDL_Color TIE_COLOR = {.r = 169, .g = 169, .b = 169};
 const SDL_Color WHITE = {.r = 255, .g = 255, .b = 255};
+const SDL_Color MENU_COLOR = {.r = 0, .g = 0, .b = 51, .a = 255};
 
 
 /* ---IMPLEMENTATIONS--- */
@@ -32,6 +33,24 @@ int renderHovering(SDL_Renderer *renderer, const int column, const game_t *game)
     renderBar(renderer, &WHITE, game);
     renderColumnHover(renderer, &TIE_COLOR, column);
     return column;
+}
+
+void renderText(SDL_Renderer *renderer, int x, int y, char *textStr, char *fontStr, int ptSize, const SDL_Color *textColor) {
+    TTF_Font *font = TTF_OpenFont(fontStr, ptSize);
+    SDL_Surface *textSurface;
+
+    textSurface = TTF_RenderUTF8_Solid(font, textStr, *textColor);
+    SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, textSurface);
+    int texW = 0;
+    int texH = 0;
+    SDL_QueryTexture(texture, NULL, NULL, &texW, &texH);
+
+    SDL_Rect dstRect = { x-texW/2, y-texH/2, texW, texH };
+    SDL_RenderCopy(renderer, texture, NULL, &dstRect);
+
+    SDL_DestroyTexture(texture);
+    SDL_FreeSurface(textSurface);
+    TTF_CloseFont(font);
 }
 
 void renderBar(SDL_Renderer *renderer, const SDL_Color *color, const game_t *game) {
@@ -59,26 +78,65 @@ void renderBar(SDL_Renderer *renderer, const SDL_Color *color, const game_t *gam
     SDL_Rect dstRect = { 0, 0, texW, texH };
     SDL_RenderCopy(renderer, texture, NULL, &dstRect);
 
-    /* TODO: some out of scope error causes Stack smashing :-(
-    char timer[10];
-    double time = getTime();
-    sprintf(timer, "time: %.2ds", time);
-    textSurface = TTF_RenderUTF8_Solid(font, moves, textColor);
-    texture = SDL_CreateTextureFromSurface(renderer, textSurface);
-    SDL_QueryTexture(texture, NULL, NULL, &texW, &texH);
-    dstRect.w = texW;
-    dstRect.h = texH;
-    dstRect.x = 0;
-    dstRect.y = 10;
-    SDL_RenderCopy(renderer, texture, NULL, &dstRect);
-    */
-
     SDL_DestroyTexture(texture);
     SDL_FreeSurface(textSurface);
 
     TTF_CloseFont(font);
     free(bar);
 } // renders whole background-color
+
+int viewHighscore(char* text) {
+    FILE *f = fopen("highscore.csv", "r");
+    int moves, player;
+    double time;
+    fscanf(f, "%d,%lf,%d", &moves, &time, &player);
+    sprintf(text, "%d moves in %.2lfs", moves, time);
+    return player;
+}
+
+void renderMenu(SDL_Renderer *renderer) {
+    SDL_SetRenderDrawColor(renderer, MENU_COLOR.r, MENU_COLOR.g, MENU_COLOR.b, MENU_COLOR.a);
+    SDL_Rect *menu;
+    menu = (SDL_Rect *) malloc(sizeof(SDL_Rect));
+    menu->x = 2*CELL_EDGE;
+    menu->y = 2*CELL_EDGE;
+    menu->w = 3*CELL_EDGE;
+    menu->h = 4*CELL_EDGE;
+    SDL_RenderFillRect(renderer, menu);
+
+    SDL_SetRenderDrawColor(renderer, WHITE.r, WHITE.g, WHITE.b, 255);
+    SDL_Rect *button;
+    button = (SDL_Rect *) malloc(sizeof(SDL_Rect));
+
+    int buttonBorder = 40;
+    int spacing = 32;
+    char* options[] = { "New Game",
+                      "Settings",
+                      "Exit Game" };
+
+    for (int i = 1; i < 4; ++i) {
+        button->x = 2*CELL_EDGE+buttonBorder;
+        button->y = 2*CELL_EDGE + i*spacing + ((i-1) * (CELL_EDGE-buttonBorder));
+        button->w = 3*CELL_EDGE - 2*buttonBorder;
+        button->h = CELL_EDGE - buttonBorder;
+        SDL_RenderDrawRect(renderer, button);
+        renderText(renderer, button->x+button->w/2, button->y+button->h/2, options[i-1], "arial.ttf", 25, &WHITE);
+    }
+
+    char highscore[30];
+    int player = viewHighscore(highscore);
+    if(player == 1) {
+        renderText(renderer, 350, 538, "Current Highscore:", "arial.ttf", 25, &WHITE);
+        renderText(renderer, 350, 563, highscore, "arial.ttf", 25, &YELLOW_COLOR);
+    } else if(player == 2) {
+        renderText(renderer, 350, 538, "Current Highscore:", "arial.ttf", 25, &WHITE);
+        renderText(renderer, 350, 563, highscore, "arial.ttf", 25, &RED_COLOR);
+    }
+
+
+    free(menu);
+    free(button);
+}
 
 void renderGrid(SDL_Renderer *renderer) {
     SDL_Color color = GRID_COLOR;
@@ -143,14 +201,17 @@ void renderGame(SDL_Renderer *renderer, const game_t *game) {
 
         case RED_WON_STATE:
             renderGameOverState(renderer, game, &RED_COLOR);
+            renderMenu(renderer);
             break;
 
         case YELLOW_WON_STATE:
             renderGameOverState(renderer, game, &YELLOW_COLOR);
+            renderMenu(renderer);
             break;
 
         case TIE_STATE:
             renderGameOverState(renderer, game, &TIE_COLOR);
+            renderMenu(renderer);
             break;
 
         default: {

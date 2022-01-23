@@ -39,6 +39,7 @@ enum gameState {
     YELLOW_WON_STATE = 2,
     RED_WON_STATE = 3,
     TIE_STATE = 4,
+    MENU_STATE = 5
 }; // different game states which invoke specific parts of the program
 
 enum cellState {
@@ -53,16 +54,18 @@ typedef struct {
 } cell;
 
 typedef struct {
+    double time;
+    int moves;
+} highscore;
+
+typedef struct {
     uint8_t board[ROWS][COLUMNS];
     cell newPiece;
     uint8_t player;
     uint8_t state;
     uint8_t aiTurn;
-
     int moves;
 } game_t; // game-structure containing current board layout, player with next turn, game state.
-
-double getTime();
 
 int movesToWin(int movesTotal);
 

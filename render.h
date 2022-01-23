@@ -23,9 +23,11 @@ extern const SDL_Color TIE_COLOR;
 extern const SDL_Color WHITE;
 
 
-int renderHovering(SDL_Renderer *renderer, const int column, const game_t *game);
+int renderHovering(SDL_Renderer *renderer, int column, const game_t *game);
 
 void renderBar(SDL_Renderer *renderer, const SDL_Color *color, const game_t *game);
+
+void renderMenu(SDL_Renderer *renderer);
 
 void renderGame(SDL_Renderer *renderer, const game_t *game);
 
