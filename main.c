@@ -12,6 +12,11 @@ int main(int argc, char **argv) {
         return EXIT_FAILURE;
     } // initialize SDL2 subsystem with video support
 
+    if(TTF_Init() == -1) {
+        printf("Could not initialize sdl_ttf: %s\n", TTF_GetError());
+        return EXIT_FAILURE;
+    } // initialize SDL2 subsystem with video support
+
     SDL_Window *window = SDL_CreateWindow("CConnect4", 100, 100, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
     if(!window) {
         printf("SDL_CreateWindow Error: %s\n", SDL_GetError());
@@ -32,6 +37,9 @@ int main(int argc, char **argv) {
     // set everything to white
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
     SDL_RenderClear(renderer);
+    renderGrid(renderer);
+    SDL_RenderPresent(renderer);
+
 
     srand(time(NULL));   // Initialization, should only be called once.
 
@@ -47,26 +55,44 @@ int main(int argc, char **argv) {
 
                 case SDL_MOUSEBUTTONDOWN:
                     clickedOnColumn(game, e.button.x / CELL_EDGE, e.button.y / CELL_EDGE);
+                    renderGame(renderer, game);
+                    SDL_RenderPresent(renderer);
+
+                    if(game->aiTurn && game->state == RUNNING_STATE) {
+                        computerTurn(game);
+                        sleep(1);
+                        renderGame(renderer, game);
+                        SDL_RenderPresent(renderer);
+                    }
+
+                    if(!game->state) {
+                        renderGame(renderer, game);
+                        SDL_RenderPresent(renderer);
+                    }
+
                     break;
 
                 case SDL_MOUSEMOTION:
+                    break;
+                    //TODO: fix motion animation
                     if(!(e.button.y / CELL_EDGE)) {
-                        if(prev != (e.button.y / CELL_EDGE)) prev = renderHovering(renderer, e.button.x / CELL_EDGE);
+                        if(prev != (e.button.y / CELL_EDGE)) {
+                            prev = renderHovering(renderer, e.button.x / CELL_EDGE, game);
+                            renderGame(renderer, game);
+                            SDL_RenderPresent(renderer);
+                        }
                     }
 
                 default: {
                 }
             }
         }
-
-        // render new game and present to user
-        renderGame(renderer, game);
-        SDL_RenderPresent(renderer);
     }
 
 
     //quit and deallocate everything
     SDL_DestroyWindow(window);
+    TTF_Quit();
     SDL_Quit();
     free(game);
 

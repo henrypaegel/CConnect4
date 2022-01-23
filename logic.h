@@ -5,9 +5,13 @@
 #ifndef CCONNECT4_LOGIC_H
 #define CCONNECT4_LOGIC_H
 
+#include <stdio.h>
 #include <stdint.h>
-#include <time.h>
+#include <string.h>
 #include <stdlib.h>
+#include <time.h>
+#include <unistd.h> //you need this for linux!
+
 
 
 /* ---DEFINITIONS--- */
@@ -18,7 +22,7 @@
 #define FALSE 0
 
 #define AI_GAME 1
-#define AI_MODE EASY
+#define AI_MODE MEDIUM
 
 //TODO: check whether CELL_EDGE is equivalent to SCREEN_PITCH
 #define CELL_EDGE (SCREEN_WIDTH / COLUMNS) // size of square of cells on the board
@@ -40,20 +44,27 @@ enum gameState {
 enum cellState {
     EMPTY = 0,
     YELLOW = 1,
-    RED = 2
+    RED = 2,
 }; // all possible states a cell on the board can have
-
-typedef struct {
-    uint8_t board[ROWS][COLUMNS];
-    uint8_t player;
-    uint8_t state;
-    uint8_t aiTurn;
-} game_t; // game-structure containing current board layout, player with next turn, game state.
 
 typedef struct {
     uint8_t row;
     uint8_t column;
 } cell;
+
+typedef struct {
+    uint8_t board[ROWS][COLUMNS];
+    cell newPiece;
+    uint8_t player;
+    uint8_t state;
+    uint8_t aiTurn;
+
+    int moves;
+} game_t; // game-structure containing current board layout, player with next turn, game state.
+
+double getTime();
+
+int movesToWin(int movesTotal);
 
 void switchPlayer(game_t *game);
 
