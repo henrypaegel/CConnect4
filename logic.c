@@ -109,6 +109,7 @@ int findEmptyRow(game_t* game, int column) {
     return -1;
 }
 
+
 int countInWindow(const uint8_t window[], const uint8_t cell, int offset) {
     int count = 0;
     for (int i = 0; i < 4; i++) {

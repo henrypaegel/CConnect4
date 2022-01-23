@@ -115,6 +115,7 @@ void renderBoard(SDL_Renderer *renderer, const game_t *game) {
                 case YELLOW:
                     filledCircleRGBA(renderer, i * CELL_EDGE + 0.5 * CELL_EDGE, j * CELL_EDGE + 1.5 * CELL_EDGE,
                                      0.9 * 0.5 * SCREEN_PITCH, YELLOW_COLOR.r, YELLOW_COLOR.g, YELLOW_COLOR.b, 255);
+
                     break;
 
                 default: {

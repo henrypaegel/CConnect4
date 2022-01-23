@@ -6,11 +6,12 @@
 #define CCONNECT4_LOGIC_H
 
 #include <stdio.h>
-#include <stdint.h>
+#include <stdint.h
 #include <string.h>
 #include <stdlib.h>
 #include <time.h>
 #include <unistd.h> //you need this for linux!
+
 
 
 /* ---DEFINITIONS--- */
@@ -57,6 +58,7 @@ typedef struct {
     uint8_t player;
     uint8_t state;
     uint8_t aiTurn;
+
     int moves;
 } game_t; // game-structure containing current board layout, player with next turn, game state.
 

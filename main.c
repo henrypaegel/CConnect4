@@ -40,6 +40,7 @@ int main(int argc, char **argv) {
     renderGrid(renderer);
     SDL_RenderPresent(renderer);
 
+
     srand(time(NULL));   // Initialization, should only be called once.
 
     // game loop driven by SDL_Event to react on user input
