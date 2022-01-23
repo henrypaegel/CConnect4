@@ -27,9 +27,9 @@ int renderHovering(SDL_Renderer *renderer, int column, const game_t *game);
 
 void renderBar(SDL_Renderer *renderer, const SDL_Color *color, const game_t *game);
 
-void renderMenu(SDL_Renderer *renderer);
+void renderMenu(SDL_Renderer *renderer, gameSettings *settings);
 
-void renderGame(SDL_Renderer *renderer, const game_t *game);
+void renderGame(SDL_Renderer *renderer, const game_t *game, gameSettings *settings);
 
 void renderGrid(SDL_Renderer *renderer);
 

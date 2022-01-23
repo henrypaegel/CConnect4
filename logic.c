@@ -28,9 +28,9 @@ void switchPlayer(game_t *game) {
         game->player = RED;
     }
 
-    if(AI_GAME && game->aiTurn) {
+    if(game->aiTurn) {
         game->aiTurn = FALSE;
-    } else if(AI_GAME) {
+    } else {
         game->aiTurn = TRUE;
     }
 
@@ -97,13 +97,17 @@ int checkHighscore (const game_t *game, enum cellState player) {
     } else {
         char metrics[10];
         time(&end);
-        sprintf(metrics, "%.2d,%.2lf,%d", movesToWin(game->moves), difftime(end, start), player);
+        int playerMoves = movesToWin(game->moves);
+        //if(game->aiTurn && playerMoves == 3) playerMoves++; TODO: probably not needed anymore
+        sprintf(metrics, "%.2d,%.2lf,%d", playerMoves, difftime(end, start), player);
         if(!feof(fRead)) fgets(row, maxchar, fRead);
         if(strcmp(metrics, row) < 0) {
             FILE *fOverwrite = fopen("highscore.csv", "w+");
             fputs(metrics, fOverwrite);
+            fclose(fOverwrite);
             return 1;
         }
+        fclose(fRead);
         return 0;
     }
 }
@@ -281,12 +285,12 @@ void minimax(game_t *game, int depth, int alpha, int beta, uint8_t maximizingPla
 }
 
 
-void computerTurn(game_t *game) {
-    if(AI_MODE == EASY) {
+void computerTurn(game_t *game, gameSettings *settings) {
+    if(settings->difficulty == EASY) {
         int column = randomLegalColumn(game);
         cell newPiece = {.row = findEmptyRow(game, column), .column = column};
         playerTurn(game, &newPiece);
-    } else if(AI_MODE == MEDIUM) {
+    } else if(settings->difficulty == MEDIUM) {
         int column = pickBestColumn(game, game->player);
         int row = findEmptyRow(game, column);
         cell newPiece = {.row = row, .column = column};
@@ -306,21 +310,26 @@ void playerTurn(game_t *game, cell *newPiece) {
     switchPlayer(game); // prepare next turn
 } // player makes a move; new board-layout is checked against game-state-change
 
-void resetGame(game_t *game) {
-    game->player = YELLOW; //TODO: eventuell vom Nutzer zu wählen
+void resetGame(game_t *game, gameSettings *settings) {
+    game->player = YELLOW;
     game->state = MENU_STATE;
-    game->aiTurn = FALSE; //TODO: let user decide if game starts with ai or not (also assigns color to ai)
+    if(settings->randomStart == 0) {
+        int random = rand();
+        game->aiTurn = random%2;
+    } else {
+        game->aiTurn = FALSE;
+    }
     for (int i = 0; i < ROWS; i++) {
         for (int j = 0; j < COLUMNS; j++) {
             game->board[i][j] = EMPTY;
         }
     }
-    if(game->aiTurn) computerTurn(game);
     game->moves = 0;
     time(&start);
+    if(settings->aiGame && game->aiTurn) computerTurn(game, settings);
 } // (re)set board as well as other game-attributes to their initial values
 
-void clickedOnColumn(game_t *game, int column, int row) {
+void clickedOnColumn(game_t *game, int column, int row, gameSettings *settings) {
     if(game->state == RUNNING_STATE) {
         if(row) return;
         for (int i = ROWS - 1; i >= 0; i--) { // iterate from bottom to top on chosen column
@@ -333,6 +342,6 @@ void clickedOnColumn(game_t *game, int column, int row) {
             }
         }
     } else {
-        resetGame(game);
+        resetGame(game, settings);
     }
 } // invoke actions that follow a mousebutton-down-event

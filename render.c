@@ -94,14 +94,14 @@ int viewHighscore(char* text) {
     return player;
 }
 
-void renderMenu(SDL_Renderer *renderer) {
+void renderMenu(SDL_Renderer *renderer, gameSettings *settings) {
     SDL_SetRenderDrawColor(renderer, MENU_COLOR.r, MENU_COLOR.g, MENU_COLOR.b, MENU_COLOR.a);
     SDL_Rect *menu;
     menu = (SDL_Rect *) malloc(sizeof(SDL_Rect));
     menu->x = 2*CELL_EDGE;
     menu->y = 2*CELL_EDGE;
     menu->w = 3*CELL_EDGE;
-    menu->h = 4*CELL_EDGE;
+    menu->h = 4.75*CELL_EDGE;
     SDL_RenderFillRect(renderer, menu);
 
     SDL_SetRenderDrawColor(renderer, WHITE.r, WHITE.g, WHITE.b, 255);
@@ -111,28 +111,53 @@ void renderMenu(SDL_Renderer *renderer) {
     int buttonBorder = 40;
     int spacing = 32;
     char* options[] = { "New Game",
-                      "Settings",
                       "Exit Game" };
 
-    for (int i = 1; i < 4; ++i) {
-        button->x = 2*CELL_EDGE+buttonBorder;
+    button->x = 240;
+    button->w = 3*CELL_EDGE - 2*buttonBorder;
+    button->h = CELL_EDGE - buttonBorder;
+    for (int i = 1; i < 3; ++i) {
         button->y = 2*CELL_EDGE + i*spacing + ((i-1) * (CELL_EDGE-buttonBorder));
-        button->w = 3*CELL_EDGE - 2*buttonBorder;
-        button->h = CELL_EDGE - buttonBorder;
         SDL_RenderDrawRect(renderer, button);
         renderText(renderer, button->x+button->w/2, button->y+button->h/2, options[i-1], "arial.ttf", 25, &WHITE);
+    }
+
+    button->y = 416;
+    SDL_RenderDrawRect(renderer, button);
+    if(settings->aiGame == 1) {
+        renderText(renderer, button->x + button->w / 2, button->y + button->h / 2, "Player vs COM", "arial.ttf", 25,
+                   &WHITE);
+    } else if(settings->aiGame == 0){
+        renderText(renderer, button->x+button->w/2, button->y+button->h/2, "Player vs Player", "arial.ttf", 25, &WHITE);
+    }
+
+    button->y = 492;
+    button->w = 108;
+    button->h = 60;
+    SDL_RenderDrawRect(renderer, button);
+    if(settings->difficulty == EASY) {
+        renderText(renderer, button->x+button->w/2, button->y+button->h/2, "EASY", "arial.ttf", 20, &WHITE);
+    } else if(settings->difficulty == MEDIUM) {
+        renderText(renderer, button->x+button->w/2, button->y+button->h/2, "MEDIUM", "arial.ttf", 20, &WHITE);
+    }
+
+    button->x += 112;
+    SDL_RenderDrawRect(renderer, button);
+    if(settings->randomStart ==  1) {
+        renderText(renderer, button->x+button->w/2, button->y+button->h/2, "RANDOM", "arial.ttf", 20, &WHITE);
+    } else if(settings->randomStart == 0) {
+        renderText(renderer, button->x+button->w/2, button->y+button->h/2, "PLAYER", "arial.ttf", 20, &WHITE);
     }
 
     char highscore[30];
     int player = viewHighscore(highscore);
     if(player == 1) {
-        renderText(renderer, 350, 538, "Current Highscore:", "arial.ttf", 25, &WHITE);
-        renderText(renderer, 350, 563, highscore, "arial.ttf", 25, &YELLOW_COLOR);
+        renderText(renderer, 350, 610, "Current Highscore:", "arial.ttf", 25, &WHITE);
+        renderText(renderer, 350, 635, highscore, "arial.ttf", 25, &YELLOW_COLOR);
     } else if(player == 2) {
-        renderText(renderer, 350, 538, "Current Highscore:", "arial.ttf", 25, &WHITE);
-        renderText(renderer, 350, 563, highscore, "arial.ttf", 25, &RED_COLOR);
+        renderText(renderer, 350, 610, "Current Highscore:", "arial.ttf", 25, &WHITE);
+        renderText(renderer, 350, 635, highscore, "arial.ttf", 25, &RED_COLOR);
     }
-
 
     free(menu);
     free(button);
@@ -191,7 +216,7 @@ void renderGameOverState(SDL_Renderer *renderer, const game_t *game, const SDL_C
     renderBar(renderer, color, game);
 } // renders background, then crate with white pieces and lastly actual colored pieces
 
-void renderGame(SDL_Renderer *renderer, const game_t *game) {
+void renderGame(SDL_Renderer *renderer, const game_t *game, gameSettings *settings) {
     switch (game->state) {
         case RUNNING_STATE:
             renderBar(renderer, &WHITE, game);
@@ -201,17 +226,17 @@ void renderGame(SDL_Renderer *renderer, const game_t *game) {
 
         case RED_WON_STATE:
             renderGameOverState(renderer, game, &RED_COLOR);
-            renderMenu(renderer);
+            renderMenu(renderer, settings);
             break;
 
         case YELLOW_WON_STATE:
             renderGameOverState(renderer, game, &YELLOW_COLOR);
-            renderMenu(renderer);
+            renderMenu(renderer, settings);
             break;
 
         case TIE_STATE:
             renderGameOverState(renderer, game, &TIE_COLOR);
-            renderMenu(renderer);
+            renderMenu(renderer, settings);
             break;
 
         default: {

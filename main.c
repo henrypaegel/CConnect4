@@ -14,6 +14,12 @@ int clickedButton(SDL_Event *e) {
             return 2;
         } else if(e->button.y >= 416 && e->button.y <= 476) {
             return 3;
+        } else if(e->button.y >= 508 && e->button.y <= 568) {
+            if(e->button.x <= 348) {
+                return 4;
+            } else if (e->button.x >= 352) {
+                return 5;
+            }
         }
     }
     return 0;
@@ -46,12 +52,19 @@ int main(int argc, char **argv) {
 
     // create game object and initialize the game
     game_t *game = (game_t *) malloc(sizeof(game_t));
-    resetGame(game);
+    game->state = MENU_STATE;
+
+    gameSettings *settings = (gameSettings *) malloc(sizeof(gameSettings));
+    settings->aiGame = 1;
+    settings->difficulty = MEDIUM;
+    settings->randomStart = 0;
+
+    //resetGame(game);
     // set everything to white
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
     SDL_RenderClear(renderer);
     renderGrid(renderer);
-    renderMenu(renderer);
+    renderMenu(renderer, settings);
     SDL_RenderPresent(renderer);
 
 
@@ -72,32 +85,61 @@ int main(int argc, char **argv) {
                     if(game->state == MENU_STATE) {
                         switch (clickedButton(&e)) {
                             case 1:
-                                resetGame(game);
+                                resetGame(game, settings);
                                 game->state = RUNNING_STATE;
                                 break;
 
                             case 2:
+                                game->state = QUIT_STATE;
                                 break;
 
                             case 3:
-                                game->state = QUIT_STATE;
+                                if(settings->aiGame == 1) {
+                                    settings->aiGame = 0;
+                                } else {
+                                    settings->aiGame = 1;
+                                }
+                                renderGrid(renderer);
+                                renderMenu(renderer, settings);
+                                SDL_RenderPresent(renderer);
+                                break;
+
+                            case 4:
+                                if(settings->difficulty == EASY) {
+                                    settings->difficulty = MEDIUM;
+                                } else {
+                                    settings->difficulty = EASY;
+                                }
+                                renderGrid(renderer);
+                                renderMenu(renderer, settings);
+                                SDL_RenderPresent(renderer);
+                                break;
+                            case 5:
+                                if(settings->randomStart == 1) {
+                                    settings->randomStart = 0;
+                                } else {
+                                    settings->randomStart = 1;
+                                }
+                                renderGrid(renderer);
+                                renderMenu(renderer, settings);
+                                SDL_RenderPresent(renderer);
                                 break;
                         }
                     }
-                    if(game->state) {
-                        clickedOnColumn(game, e.button.x / CELL_EDGE, e.button.y / CELL_EDGE);
-                        renderGame(renderer, game);
+                    if(game->state != QUIT_STATE && game->state != MENU_STATE) {
+                        clickedOnColumn(game, e.button.x / CELL_EDGE, e.button.y / CELL_EDGE, settings);
+                        renderGame(renderer, game, settings);
                         SDL_RenderPresent(renderer);
 
-                        if(game->aiTurn && game->state == RUNNING_STATE) {
-                            computerTurn(game);
+                        if(settings->aiGame && game->aiTurn && game->state == RUNNING_STATE) {
+                            computerTurn(game, settings);
                             sleep(1);
-                            renderGame(renderer, game);
+                            renderGame(renderer, game, settings);
                             SDL_RenderPresent(renderer);
                         }
 
-                        if(!game->state) {
-                            renderGame(renderer, game);
+                        if(!game->state) { //TODO: why?
+                            renderGame(renderer, game, settings);
                             SDL_RenderPresent(renderer);
                         }
                     }
@@ -110,7 +152,7 @@ int main(int argc, char **argv) {
                     if(!(e.button.y / CELL_EDGE)) {
                         if(prev != (e.button.y / CELL_EDGE)) {
                             prev = renderHovering(renderer, e.button.x / CELL_EDGE, game);
-                            renderGame(renderer, game);
+                            renderGame(renderer, game, settings);
                             SDL_RenderPresent(renderer);
                         }
                     }
