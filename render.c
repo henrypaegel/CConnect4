@@ -5,14 +5,13 @@
 #include "render.h"
 #include "logic.h"
 
-const SDL_Color GRID_COLOR = {.r = 0, .g = 50, .b = 130};
-const SDL_Color RED_COLOR = {.r = 180, .g = 0, .b = 0};
-const SDL_Color YELLOW_COLOR = {.r = 230, .g = 180, .b = 20};
-const SDL_Color TIE_COLOR = {.r = 169, .g = 169, .b = 169};
-const SDL_Color WHITE = {.r = 255, .g = 255, .b = 255};
+const SDL_Color GRID_COLOR = {.r = 46, .g = 67, .b = 117};
+const SDL_Color RED_COLOR = {.r = 201, .g = 60, .b = 32};
+const SDL_Color YELLOW_COLOR = {.r = 243, .g = 224, .b = 59};
+const SDL_Color TIE_COLOR = {.r = 102, .g = 102, .b = 102};
+const SDL_Color WHITE = {.r = 233, .g = 224, .b = 200};
 const SDL_Color BLACK = {.r = 0, .g = 0, .b = 0};
-const SDL_Color MENU_COLOR = {.r = 0, .g = 0, .b = 51, .a = 255};
-
+const SDL_Color MENU_COLOR = {.r = 0, .g = 0, .b = 51};
 
 /* ---IMPLEMENTATIONS--- */
 
@@ -46,9 +45,18 @@ void renderBar(SDL_Renderer *renderer, const SDL_Color *color, const game_t *gam
     SDL_RenderFillRect(renderer, bar);
     free(bar);
 
+    SDL_SetRenderDrawColor(renderer, TIE_COLOR.r, TIE_COLOR.g, TIE_COLOR.b, 255);
+    SDL_Rect *textBack;
+    textBack = (SDL_Rect *) malloc(sizeof(SDL_Rect));
+    textBack->x = 0;
+    textBack->y = 0;
+    textBack->w = 150;
+    textBack->h = 42;
+    SDL_RenderFillRect(renderer, textBack);
+
     char moves[10];
     sprintf(moves, "moves: %.2d", movesToWin(game->moves));
-    renderText(renderer, 65, 15, moves, "ChakraPetch-Bold.ttf", 25, &BLACK);
+    renderText(renderer, 75, 20, moves, "ChakraPetch-Bold.ttf", 25, &BLACK);
 
     SDL_Color playerColor;
     if(game->player == YELLOW) {
@@ -57,10 +65,16 @@ void renderBar(SDL_Renderer *renderer, const SDL_Color *color, const game_t *gam
         playerColor = RED_COLOR;
     }
 
+    SDL_SetRenderDrawColor(renderer, TIE_COLOR.r, TIE_COLOR.g, TIE_COLOR.b, 255);
+    textBack->x = 550;
+    textBack->w = 150;
+    SDL_RenderFillRect(renderer, textBack);
+    free(textBack);
+
     if(settings->aiGame && game->aiTurn) {
-        renderText(renderer, SCREEN_WIDTH-75, 15, "COM's turn", "ChakraPetch-Bold.ttf", 25, &playerColor);
+        renderText(renderer, SCREEN_WIDTH-75, 20, "COM turn", "ChakraPetch-Bold.ttf", 25, &playerColor);
     } else {
-        renderText(renderer, SCREEN_WIDTH-66, 15, "Your turn", "ChakraPetch-Bold.ttf", 25, &playerColor);
+        renderText(renderer, SCREEN_WIDTH-75, 20, "Your turn", "ChakraPetch-Bold.ttf", 25, &playerColor);
     }
 } //
 

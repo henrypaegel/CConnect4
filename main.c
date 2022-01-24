@@ -65,7 +65,7 @@ int main(int argc, char **argv) {
 
     //resetGame(game);
     // set everything to white
-    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+    SDL_SetRenderDrawColor(renderer, WHITE.r, WHITE.g, WHITE.b, 255);
     SDL_RenderClear(renderer);
     renderGrid(renderer);
     renderMenu(renderer, settings);
