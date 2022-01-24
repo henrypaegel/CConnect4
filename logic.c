@@ -136,17 +136,19 @@ int countInWindow(const uint8_t window[], const uint8_t cell, int offset) {
     return count;
 }
 
-int scoreAxis(int length, uint8_t axis[length], uint8_t player) {
+int scoreAxis(int length, uint8_t axis[length], uint8_t player, int *isTerminalNode) {
     // Look through every window of four in every row and assign scores to different formations.
     int score = 0;
     for (int offset = 0; offset < length - 3; offset++) {
         if(countInWindow(axis, player, offset) == 4) {
+            *isTerminalNode = TRUE;
             score += 100;
         } else if(countInWindow(axis, player, offset) == 3 && countInWindow(axis, EMPTY, offset) == 1) {
             score += 5;
         } else if(countInWindow(axis, player, offset) == 2 && countInWindow(axis, EMPTY, offset) == 2) {
             score += 2;
         } else if(countInWindow(axis, oppositePlayer(player), offset) == 4) {
+            *isTerminalNode = TRUE;
             score -= 80;
         } else if(countInWindow(axis, oppositePlayer(player), offset) == 3 && countInWindow(axis, EMPTY, offset) == 1) {
             score -= 10;
@@ -165,7 +167,7 @@ void getDiagonal(const uint8_t board[][COLUMNS], uint8_t window[], int startR, i
     }
 }
 
-int scoreBoard(const uint8_t board[][COLUMNS], cell piece, uint8_t player) {
+int scoreBoard(const uint8_t board[][COLUMNS], cell piece, uint8_t player, int *isTerminalNode) {
     int score = 0;
 
     //center column
@@ -193,7 +195,7 @@ int scoreBoard(const uint8_t board[][COLUMNS], cell piece, uint8_t player) {
             }
         }
         // Look through every window of four in every row and assign scores to different formations.
-        score += scoreAxis(COLUMNS, row, player);
+        score += scoreAxis(COLUMNS, row, player, isTerminalNode);
     }
 
     //check vertical score
@@ -208,7 +210,7 @@ int scoreBoard(const uint8_t board[][COLUMNS], cell piece, uint8_t player) {
             }
         }
         // Look through every window of four in every row and assign scores to different formations.
-        score += scoreAxis(ROWS, column, player);
+        score += scoreAxis(ROWS, column, player, isTerminalNode);
     }
 
     //check diagonal score
@@ -217,20 +219,20 @@ int scoreBoard(const uint8_t board[][COLUMNS], cell piece, uint8_t player) {
     // left-leaning (negative slope)
     for (int r = 2; r >= 0; r--) {
         getDiagonal(board, diagonal, r, 0);
-        score += scoreAxis(6, diagonal, player);
+        score += scoreAxis(6, diagonal, player, isTerminalNode);
     }
     for (int c = 0; c <= 3; c++) {
         getDiagonal(board, diagonal, 0, c);
-        score += scoreAxis(6, diagonal, player);
+        score += scoreAxis(6, diagonal, player, isTerminalNode);
     }
     // right-leaning (positive slope)
     for (int c = 3; c <= 6; c++) {
         getDiagonal(board, diagonal, 0, c);
-        score += scoreAxis(6, diagonal, player);
+        score += scoreAxis(6, diagonal, player, isTerminalNode);
     }
     for (int r = 1; r <= 2; r++) {
         getDiagonal(board, diagonal, r, 6);
-        score += scoreAxis(6, diagonal, player);
+        score += scoreAxis(6, diagonal, player, isTerminalNode);
     }
 
     return score;
@@ -255,7 +257,8 @@ int pickBestColumn(const game_t *game, const uint8_t player) {
             int score;
             if(game->board[j][i] == EMPTY) { // check if column has at least one empty cell
                 cell testPiece = {.row = j, .column = i};
-                score = scoreBoard(game->board, testPiece, player);
+                int *isTerminalNode = FALSE;
+                score = scoreBoard(game->board, testPiece, player, isTerminalNode);
                 if(score > bestScore) {
                     bestScore = score;
                     bestColumn = i;
@@ -273,8 +276,21 @@ int isLastNode(game_t *game, cell *newPiece) {
             !countCells(game->board, EMPTY);
 }
 
-void minimax(game_t *game, int depth, int alpha, int beta, uint8_t maximizingPlayer) {
-    //int lastNode = isLastNode(game, );
+void minimax(const game_t *game, int depth, int alpha, int beta, uint8_t maximizingPlayer) {
+    cell none = {.row = -1, .column = -1};
+    int *isTerminalNode = FALSE;
+    if(!countCells(game->board, EMPTY)) {
+        *isTerminalNode = TRUE;
+    } else {
+        scoreBoard(game->board, none, maximizingPlayer, isTerminalNode);
+    }
+
+    if(!depth || *isTerminalNode) {
+        if(*isTerminalNode) {
+
+        }
+    }
+
 }//TODO: add minimax
 
 int computerTurn(game_t *game, gameSettings *settings) {
