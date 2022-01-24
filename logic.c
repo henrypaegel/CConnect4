@@ -83,30 +83,27 @@ int checkPlayerWon(game_t *game, uint8_t player, cell *newPiece) {
 
 
 int checkHighscore (const game_t *game, enum cellState player) {
-    //compare the score to other highscores
-    //if new highstore --> return 1 and save it
-    //if not return 0
-
-    int maxchar = 20;
     FILE *fRead = fopen("highscore.csv", "r");
-    char row[maxchar];
 
     if(fRead == NULL) {
         printf("Couldn't open file!");
         return -1;
     } else {
-        char metrics[10];
+        char row[12], metrics[12];
+        fgets(row, 12, fRead);
+
         time(&end);
         int playerMoves = movesToWin(game->moves);
-        //if(game->aiTurn && playerMoves == 3) playerMoves++; TODO: probably not needed anymore
         sprintf(metrics, "%.2d,%.2lf,%d", playerMoves, difftime(end, start), player);
-        if(!feof(fRead)) fgets(row, maxchar, fRead);
+
         if(strcmp(metrics, row) < 0) {
             FILE *fOverwrite = fopen("highscore.csv", "w+");
             fputs(metrics, fOverwrite);
             fclose(fOverwrite);
+            fclose(fRead);
             return 1;
         }
+
         fclose(fRead);
         return 0;
     }
@@ -130,7 +127,6 @@ int findEmptyRow(game_t* game, int column) {
     }
     return -1;
 }
-
 
 int countInWindow(const uint8_t window[], const uint8_t cell, int offset) {
     int count = 0;
@@ -185,7 +181,6 @@ int scoreBoard(const uint8_t board[][COLUMNS], cell piece, uint8_t player) {
     }
     score += countInWindow(center, player, 0) * 3;
 
-
     //check horizontal score
     uint8_t row[COLUMNS];
     for (int r = 0; r < ROWS; r++) {
@@ -238,7 +233,6 @@ int scoreBoard(const uint8_t board[][COLUMNS], cell piece, uint8_t player) {
         score += scoreAxis(6, diagonal, player);
     }
 
-
     return score;
 }
 
@@ -251,7 +245,6 @@ int randomLegalColumn(const game_t *game) {
     }
     return column;
 }
-
 
 int pickBestColumn(const game_t *game, const uint8_t player) {
     int bestScore = 0;
@@ -282,20 +275,23 @@ int isLastNode(game_t *game, cell *newPiece) {
 
 void minimax(game_t *game, int depth, int alpha, int beta, uint8_t maximizingPlayer) {
     //int lastNode = isLastNode(game, );
-}
+}//TODO: add minimax
 
-
-void computerTurn(game_t *game, gameSettings *settings) {
-    if(settings->difficulty == EASY) {
-        int column = randomLegalColumn(game);
-        cell newPiece = {.row = findEmptyRow(game, column), .column = column};
-        playerTurn(game, &newPiece);
-    } else if(settings->difficulty == MEDIUM) {
-        int column = pickBestColumn(game, game->player);
-        int row = findEmptyRow(game, column);
-        cell newPiece = {.row = row, .column = column};
-        playerTurn(game, &newPiece);
+int computerTurn(game_t *game, gameSettings *settings) {
+    if(settings->aiGame && game->aiTurn && game->state == RUNNING_STATE) {
+        if(settings->difficulty == EASY) {
+            int column = randomLegalColumn(game);
+            cell newPiece = {.row = findEmptyRow(game, column), .column = column};
+            playerTurn(game, &newPiece);
+        } else if(settings->difficulty == MEDIUM) {
+            int column = pickBestColumn(game, game->player);
+            int row = findEmptyRow(game, column);
+            cell newPiece = {.row = row, .column = column};
+            playerTurn(game, &newPiece);
+        }
+        return TRUE;
     }
+    return FALSE;
 }
 
 void makeMove(game_t *game, cell *newPiece) {
@@ -328,9 +324,9 @@ void resetGame(game_t *game, gameSettings *settings) {
     time(&start);
 } // (re)set board as well as other game-attributes to their initial values
 
-void clickedOnColumn(game_t *game, int column, int row, gameSettings *settings) {
+int clickedOnColumn(game_t *game, int column, int row, gameSettings *settings) {
     if(game->state == RUNNING_STATE) {
-        if(row) return;
+        if(row) return 0;
         for (int i = ROWS - 1; i >= 0; i--) { // iterate from bottom to top on chosen column
             if(game->board[i][column] == EMPTY) { // check if column has at least one empty cell
                 cell newPiece = {.row = i, .column = column};
@@ -342,5 +338,7 @@ void clickedOnColumn(game_t *game, int column, int row, gameSettings *settings) 
         }
     } else {
         resetGame(game, settings);
+        return 0;
     }
+    return 1;
 } // invoke actions that follow a mousebutton-down-event

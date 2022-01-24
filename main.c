@@ -26,10 +26,14 @@ int clickedButton(SDL_Event *e) {
 }
 
 int main(int argc, char **argv) {
-    if(SDL_Init(SDL_INIT_VIDEO)) {
+    if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO)) {
         printf("Could not initialize sdl2: %s\n", SDL_GetError());
         return EXIT_FAILURE;
     } // initialize SDL2 subsystem with video support
+
+    Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048);
+    Mix_Music *dropAudio = Mix_LoadMUS("piece-drop.mp3");
+    Mix_Music *buttonAudio = Mix_LoadMUS("button-click.mp3");
 
     if(TTF_Init() == -1) {
         printf("Could not initialize sdl_ttf: %s\n", TTF_GetError());
@@ -73,7 +77,6 @@ int main(int argc, char **argv) {
     // game loop driven by SDL_Event to react on user input
     SDL_Event e;
     while (game->state) {
-        //int prev = -1;
         while (SDL_PollEvent(&e)) {
             switch (e.type) {
                 case SDL_QUIT:
@@ -81,12 +84,14 @@ int main(int argc, char **argv) {
                     break;
 
                 case SDL_MOUSEBUTTONDOWN:
-                    //TODO: test if menu was clicked
-                    if(game->state == MENU_STATE) {
+                    if(game->state != RUNNING_STATE) {
                         switch (clickedButton(&e)) {
                             case 1:
                                 resetGame(game, settings);
                                 game->state = RUNNING_STATE;
+                                renderGrid(renderer);
+                                renderBar(renderer, &WHITE, game, settings);
+                                SDL_RenderPresent(renderer);
                                 break;
 
                             case 2:
@@ -101,6 +106,7 @@ int main(int argc, char **argv) {
                                 }
                                 renderGrid(renderer);
                                 renderMenu(renderer, settings);
+                                Mix_PlayMusic(buttonAudio, 1);
                                 SDL_RenderPresent(renderer);
                                 break;
 
@@ -112,6 +118,7 @@ int main(int argc, char **argv) {
                                 }
                                 renderGrid(renderer);
                                 renderMenu(renderer, settings);
+                                Mix_PlayMusic(buttonAudio, 1);
                                 SDL_RenderPresent(renderer);
                                 break;
                             case 5:
@@ -122,43 +129,38 @@ int main(int argc, char **argv) {
                                 }
                                 renderGrid(renderer);
                                 renderMenu(renderer, settings);
+                                Mix_PlayMusic(buttonAudio, 1);
                                 SDL_RenderPresent(renderer);
                                 break;
                         }
+                        int aiTurn = computerTurn(game, settings);
+                        if(aiTurn) {
+                            usleep(rand() % 500001 + 500000);
+                            renderGame(renderer, game, settings);
+                            Mix_PlayMusic(dropAudio, 1);
+                            SDL_RenderPresent(renderer);
+                        }
+                        break;
                     }
                     if(game->state != QUIT_STATE && game->state != MENU_STATE) {
-                        clickedOnColumn(game, e.button.x / CELL_EDGE, e.button.y / CELL_EDGE, settings);
+                        int newMove = clickedOnColumn(game, e.button.x / CELL_EDGE, e.button.y / CELL_EDGE, settings);
                         renderGame(renderer, game, settings);
+                        if(newMove) Mix_PlayMusic(dropAudio, 1);
                         SDL_RenderPresent(renderer);
 
-                        if(settings->aiGame && game->aiTurn && game->state == RUNNING_STATE) {
-                            computerTurn(game, settings);
-                            sleep(1);
+
+                        int aiTurn = computerTurn(game, settings);
+                        if(aiTurn) {
+                            usleep(rand() % 500001 + 500000);
                             renderGame(renderer, game, settings);
+                            Mix_PlayMusic(dropAudio, 1);
                             SDL_RenderPresent(renderer);
                         }
 
-                        /*
-                        if(!game->state) { //TODO: why?
-                            renderGame(renderer, game, settings);
-                            SDL_RenderPresent(renderer);
-                        }
-                        */
                     }
 
                     break;
-                /*
-                case SDL_MOUSEMOTION:
-                    break;
-                    //TODO: fix motion animation
-                    if(!(e.button.y / CELL_EDGE)) {
-                        if(prev != (e.button.y / CELL_EDGE)) {
-                            prev = renderHovering(renderer, e.button.x / CELL_EDGE, game);
-                            renderGame(renderer, game, settings);
-                            SDL_RenderPresent(renderer);
-                        }
-                    }
-                */
+
                 default: {
                 }
             }
@@ -167,7 +169,11 @@ int main(int argc, char **argv) {
 
 
     //quit and deallocate everything
+    SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
+    Mix_FreeMusic(dropAudio);
+    Mix_FreeMusic(buttonAudio);
+    Mix_CloseAudio();
     TTF_Quit();
     SDL_Quit();
     free(game);

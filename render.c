@@ -16,26 +16,6 @@ const SDL_Color MENU_COLOR = {.r = 0, .g = 0, .b = 51, .a = 255};
 
 /* ---IMPLEMENTATIONS--- */
 
-void renderColumnHover(SDL_Renderer *renderer, const SDL_Color *color, int column) {
-    SDL_SetRenderDrawColor(renderer, color->r, color->g, color->b, 255);
-
-    SDL_Rect *board;
-    board = (SDL_Rect *) malloc(sizeof(SDL_Rect));
-    board->x = CELL_EDGE * column;
-    board->y = 0;
-    board->w = CELL_EDGE;
-    board->h = CELL_EDGE;
-    SDL_RenderFillRect(renderer, board);
-    free(board);
-} // renders whole background-color
-
-
-int renderHovering(SDL_Renderer *renderer, const int column, const game_t *game) {
-    renderBar(renderer, &WHITE, game);
-    renderColumnHover(renderer, &TIE_COLOR, column);
-    return column;
-}
-
 void renderText(SDL_Renderer *renderer, int x, int y, char *textStr, char *fontStr, int ptSize, const SDL_Color *textColor) {
     TTF_Font *font = TTF_OpenFont(fontStr, ptSize);
     SDL_Surface *textSurface;
@@ -54,7 +34,7 @@ void renderText(SDL_Renderer *renderer, int x, int y, char *textStr, char *fontS
     TTF_CloseFont(font);
 }
 
-void renderBar(SDL_Renderer *renderer, const SDL_Color *color, const game_t *game) {
+void renderBar(SDL_Renderer *renderer, const SDL_Color *color, const game_t *game, const gameSettings *settings) {
     SDL_SetRenderDrawColor(renderer, color->r, color->g, color->b, 255);
 
     SDL_Rect *bar;
@@ -64,13 +44,25 @@ void renderBar(SDL_Renderer *renderer, const SDL_Color *color, const game_t *gam
     bar->w = SCREEN_WIDTH;
     bar->h = CELL_EDGE;
     SDL_RenderFillRect(renderer, bar);
+    free(bar);
 
     char moves[10];
     sprintf(moves, "moves: %.2d", movesToWin(game->moves));
     renderText(renderer, 65, 15, moves, "ChakraPetch-Bold.ttf", 25, &BLACK);
 
-    free(bar);
-} // renders whole background-color
+    SDL_Color playerColor;
+    if(game->player == YELLOW) {
+        playerColor = YELLOW_COLOR;
+    } else {
+        playerColor = RED_COLOR;
+    }
+
+    if(settings->aiGame && game->aiTurn) {
+        renderText(renderer, SCREEN_WIDTH-75, 15, "COM's turn", "ChakraPetch-Bold.ttf", 25, &playerColor);
+    } else {
+        renderText(renderer, SCREEN_WIDTH-66, 15, "Your turn", "ChakraPetch-Bold.ttf", 25, &playerColor);
+    }
+} //
 
 int viewHighscore(char* text) {
     FILE *f = fopen("highscore.csv", "r");
@@ -171,7 +163,7 @@ void renderGrid(SDL_Renderer *renderer) {
     for (int i = 1; i <= COLUMNS; i++) {
         for (int j = 1; j <= ROWS; j++) {
             filledCircleRGBA(renderer, i * CELL_EDGE - 0.5 * CELL_EDGE, j * CELL_EDGE + 0.5 * CELL_EDGE,
-                             0.9 * 0.5 * SCREEN_PITCH, colorBackground.r, colorBackground.g, colorBackground.b, 255);
+                             0.9 * 0.5 * CELL_EDGE, colorBackground.r, colorBackground.g, colorBackground.b, 255);
         }
     }
 } // renders crate and initializes game with empty (white) cells
@@ -182,12 +174,12 @@ void renderBoard(SDL_Renderer *renderer, const game_t *game) {
             switch (game->board[j][i]) { // get cellState of current cell
                 case RED:
                     filledCircleRGBA(renderer, i * CELL_EDGE + 0.5 * CELL_EDGE, j * CELL_EDGE + 1.5 * CELL_EDGE,
-                                     0.9 * 0.5 * SCREEN_PITCH, RED_COLOR.r, RED_COLOR.g, RED_COLOR.b, 255);
+                                     0.9 * 0.5 * CELL_EDGE, RED_COLOR.r, RED_COLOR.g, RED_COLOR.b, 255);
                     break;
 
                 case YELLOW:
                     filledCircleRGBA(renderer, i * CELL_EDGE + 0.5 * CELL_EDGE, j * CELL_EDGE + 1.5 * CELL_EDGE,
-                                     0.9 * 0.5 * SCREEN_PITCH, YELLOW_COLOR.r, YELLOW_COLOR.g, YELLOW_COLOR.b, 255);
+                                     0.9 * 0.5 * CELL_EDGE, YELLOW_COLOR.r, YELLOW_COLOR.g, YELLOW_COLOR.b, 255);
 
                     break;
 
@@ -199,33 +191,32 @@ void renderBoard(SDL_Renderer *renderer, const game_t *game) {
 
 } // renders new cell either as YELLOW or RED
 
-
-void renderGameOverState(SDL_Renderer *renderer, const game_t *game, const SDL_Color *color) {
+void renderGameOverState(SDL_Renderer *renderer, const game_t *game, const SDL_Color *color, const gameSettings *settings) {
     renderGrid(renderer);
     renderBoard(renderer, game);
-    renderBar(renderer, color, game);
+    renderBar(renderer, color, game, settings);
 } // renders background, then crate with white pieces and lastly actual colored pieces
 
 void renderGame(SDL_Renderer *renderer, const game_t *game, gameSettings *settings) {
     switch (game->state) {
         case RUNNING_STATE:
-            renderBar(renderer, &WHITE, game);
+            renderBar(renderer, &WHITE, game, settings);
             renderGrid(renderer);
             renderBoard(renderer, game);
             break;
 
         case RED_WON_STATE:
-            renderGameOverState(renderer, game, &RED_COLOR);
+            renderGameOverState(renderer, game, &RED_COLOR, settings);
             renderMenu(renderer, settings);
             break;
 
         case YELLOW_WON_STATE:
-            renderGameOverState(renderer, game, &YELLOW_COLOR);
+            renderGameOverState(renderer, game, &YELLOW_COLOR, settings);
             renderMenu(renderer, settings);
             break;
 
         case TIE_STATE:
-            renderGameOverState(renderer, game, &TIE_COLOR);
+            renderGameOverState(renderer, game, &TIE_COLOR, settings);
             renderMenu(renderer, settings);
             break;
 

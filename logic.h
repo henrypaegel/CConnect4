@@ -21,9 +21,6 @@
 #define TRUE 1
 #define FALSE 0
 
-//TODO: check whether CELL_EDGE is equivalent to SCREEN_PITCH
-#define CELL_EDGE (SCREEN_WIDTH / COLUMNS) // size of square of cells on the board
-
 enum aiMode {
     EASY = 0,
     MEDIUM = 1,
@@ -51,11 +48,6 @@ typedef struct {
 } cell;
 
 typedef struct {
-    double time;
-    int moves;
-} highscore;
-
-typedef struct {
     uint8_t board[ROWS][COLUMNS];
     cell newPiece;
     uint8_t player;
@@ -78,7 +70,7 @@ int checkPlayerWon(game_t *game, uint8_t player, cell *newPiece);
 
 void playerTurn(game_t *game, cell *newPiece);
 
-void computerTurn(game_t *game, gameSettings *settings);
+int computerTurn(game_t *game, gameSettings *settings);
 
 void resetGame(game_t *game, gameSettings *settings);
 
@@ -88,6 +80,6 @@ int checkShift(game_t *game, uint8_t player, int r, int c, int rShift, int cShif
 
 void gameOverCondition(game_t *game, cell *newPiece);
 
-void clickedOnColumn(game_t *game, int column, int row, gameSettings *settings);
+int clickedOnColumn(game_t *game, int column, int row, gameSettings *settings);
 
 #endif //CCONNECT4_LOGIC_H
