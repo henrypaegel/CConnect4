@@ -313,9 +313,9 @@ void playerTurn(game_t *game, cell *newPiece) {
 void resetGame(game_t *game, gameSettings *settings) {
     game->player = YELLOW;
     game->state = MENU_STATE;
-    if(settings->randomStart == 0) {
-        int random = rand();
-        game->aiTurn = random%2;
+    if(settings->randomStart == 1) {
+        int randomBit = rand() % 2;
+        game->aiTurn = randomBit;
     } else {
         game->aiTurn = FALSE;
     }
@@ -326,7 +326,6 @@ void resetGame(game_t *game, gameSettings *settings) {
     }
     game->moves = 0;
     time(&start);
-    if(settings->aiGame && game->aiTurn) computerTurn(game, settings);
 } // (re)set board as well as other game-attributes to their initial values
 
 void clickedOnColumn(game_t *game, int column, int row, gameSettings *settings) {
@@ -335,7 +334,7 @@ void clickedOnColumn(game_t *game, int column, int row, gameSettings *settings) 
         for (int i = ROWS - 1; i >= 0; i--) { // iterate from bottom to top on chosen column
             if(game->board[i][column] == EMPTY) { // check if column has at least one empty cell
                 cell newPiece = {.row = i, .column = column};
-                if(!game->aiTurn)  {
+                if(!game->aiTurn || !settings->aiGame)  {
                     playerTurn(game, &newPiece);
                 }
                 break;

@@ -48,7 +48,7 @@ int main(int argc, char **argv) {
         printf("SDL_CreateRenderer Error: %s\n", SDL_GetError());
         return EXIT_FAILURE;
     } // create SDL2 renderer object and catch possible exceptions
-
+    //SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
 
     // create game object and initialize the game
     game_t *game = (game_t *) malloc(sizeof(game_t));
@@ -73,7 +73,7 @@ int main(int argc, char **argv) {
     // game loop driven by SDL_Event to react on user input
     SDL_Event e;
     while (game->state) {
-        int prev = -1;
+        //int prev = -1;
         while (SDL_PollEvent(&e)) {
             switch (e.type) {
                 case SDL_QUIT:
@@ -138,14 +138,16 @@ int main(int argc, char **argv) {
                             SDL_RenderPresent(renderer);
                         }
 
+                        /*
                         if(!game->state) { //TODO: why?
                             renderGame(renderer, game, settings);
                             SDL_RenderPresent(renderer);
                         }
+                        */
                     }
 
                     break;
-
+                /*
                 case SDL_MOUSEMOTION:
                     break;
                     //TODO: fix motion animation
@@ -156,7 +158,7 @@ int main(int argc, char **argv) {
                             SDL_RenderPresent(renderer);
                         }
                     }
-
+                */
                 default: {
                 }
             }

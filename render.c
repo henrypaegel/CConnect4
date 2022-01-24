@@ -10,6 +10,7 @@ const SDL_Color RED_COLOR = {.r = 180, .g = 0, .b = 0};
 const SDL_Color YELLOW_COLOR = {.r = 230, .g = 180, .b = 20};
 const SDL_Color TIE_COLOR = {.r = 169, .g = 169, .b = 169};
 const SDL_Color WHITE = {.r = 255, .g = 255, .b = 255};
+const SDL_Color BLACK = {.r = 0, .g = 0, .b = 0};
 const SDL_Color MENU_COLOR = {.r = 0, .g = 0, .b = 51, .a = 255};
 
 
@@ -64,24 +65,10 @@ void renderBar(SDL_Renderer *renderer, const SDL_Color *color, const game_t *gam
     bar->h = CELL_EDGE;
     SDL_RenderFillRect(renderer, bar);
 
-    TTF_Font *font = TTF_OpenFont("arial.ttf", 25);
-    SDL_Color textColor={0,0,0, 0};
-    SDL_Surface *textSurface;
-
     char moves[10];
     sprintf(moves, "moves: %.2d", movesToWin(game->moves));
-    textSurface = TTF_RenderUTF8_Solid(font, moves, textColor);
-    SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, textSurface);
-    int texW = 0;
-    int texH = 0;
-    SDL_QueryTexture(texture, NULL, NULL, &texW, &texH);
-    SDL_Rect dstRect = { 0, 0, texW, texH };
-    SDL_RenderCopy(renderer, texture, NULL, &dstRect);
+    renderText(renderer, 65, 15, moves, "ChakraPetch-Bold.ttf", 25, &BLACK);
 
-    SDL_DestroyTexture(texture);
-    SDL_FreeSurface(textSurface);
-
-    TTF_CloseFont(font);
     free(bar);
 } // renders whole background-color
 
@@ -119,44 +106,47 @@ void renderMenu(SDL_Renderer *renderer, gameSettings *settings) {
     for (int i = 1; i < 3; ++i) {
         button->y = 2*CELL_EDGE + i*spacing + ((i-1) * (CELL_EDGE-buttonBorder));
         SDL_RenderDrawRect(renderer, button);
-        renderText(renderer, button->x+button->w/2, button->y+button->h/2, options[i-1], "arial.ttf", 25, &WHITE);
+        renderText(renderer, button->x+button->w/2, button->y+button->h/2, options[i-1], "ChakraPetch-Medium.ttf", 25, &WHITE);
     }
 
+    SDL_Color *subColor = &WHITE;
     button->y = 416;
     SDL_RenderDrawRect(renderer, button);
     if(settings->aiGame == 1) {
-        renderText(renderer, button->x + button->w / 2, button->y + button->h / 2, "Player vs COM", "arial.ttf", 25,
-                   &WHITE);
+        renderText(renderer, button->x + button->w / 2, button->y + button->h / 2, "Player vs COM", "ChakraPetch-MediumItalic.ttf", 25, &WHITE);
     } else if(settings->aiGame == 0){
-        renderText(renderer, button->x+button->w/2, button->y+button->h/2, "Player vs Player", "arial.ttf", 25, &WHITE);
+        subColor = &TIE_COLOR;
+        renderText(renderer, button->x+button->w/2, button->y+button->h/2, "Player vs Player", "ChakraPetch-MediumItalic.ttf", 25, &WHITE);
     }
 
+
+    SDL_SetRenderDrawColor(renderer, subColor->r, subColor->g, subColor->b, 255);
     button->y = 492;
     button->w = 108;
     button->h = 60;
     SDL_RenderDrawRect(renderer, button);
     if(settings->difficulty == EASY) {
-        renderText(renderer, button->x+button->w/2, button->y+button->h/2, "EASY", "arial.ttf", 20, &WHITE);
+        renderText(renderer, button->x+button->w/2, button->y+button->h/2, "EASY", "ChakraPetch-MediumItalic.ttf", 20, subColor);
     } else if(settings->difficulty == MEDIUM) {
-        renderText(renderer, button->x+button->w/2, button->y+button->h/2, "MEDIUM", "arial.ttf", 20, &WHITE);
+        renderText(renderer, button->x+button->w/2, button->y+button->h/2, "MEDIUM", "ChakraPetch-MediumItalic.ttf", 20, subColor);
     }
 
     button->x += 112;
     SDL_RenderDrawRect(renderer, button);
     if(settings->randomStart ==  1) {
-        renderText(renderer, button->x+button->w/2, button->y+button->h/2, "RANDOM", "arial.ttf", 20, &WHITE);
+        renderText(renderer, button->x+button->w/2, button->y+button->h/2, "RANDOM", "ChakraPetch-MediumItalic.ttf", 20, subColor);
     } else if(settings->randomStart == 0) {
-        renderText(renderer, button->x+button->w/2, button->y+button->h/2, "PLAYER", "arial.ttf", 20, &WHITE);
+        renderText(renderer, button->x+button->w/2, button->y+button->h/2, "PLAYER", "ChakraPetch-MediumItalic.ttf", 20, subColor);
     }
 
     char highscore[30];
     int player = viewHighscore(highscore);
     if(player == 1) {
-        renderText(renderer, 350, 610, "Current Highscore:", "arial.ttf", 25, &WHITE);
-        renderText(renderer, 350, 635, highscore, "arial.ttf", 25, &YELLOW_COLOR);
+        renderText(renderer, 350, 610, "Current Highscore:", "ChakraPetch-Medium.ttf", 25, &WHITE);
+        renderText(renderer, 350, 635, highscore, "ChakraPetch-Medium.ttf", 25, &YELLOW_COLOR);
     } else if(player == 2) {
-        renderText(renderer, 350, 610, "Current Highscore:", "arial.ttf", 25, &WHITE);
-        renderText(renderer, 350, 635, highscore, "arial.ttf", 25, &RED_COLOR);
+        renderText(renderer, 350, 610, "Current Highscore:", "ChakraPetch-Medium.ttf", 25, &WHITE);
+        renderText(renderer, 350, 635, highscore, "ChakraPetch-Medium.ttf", 25, &RED_COLOR);
     }
 
     free(menu);
