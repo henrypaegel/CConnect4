@@ -40,12 +40,12 @@ enum cellState {
     EMPTY = 0,
     YELLOW = 1,
     RED = 2,
-}; // all possible states a cell on the board can have
+}; // all possible states a cell on the board can have; also used as player-identifier
 
 typedef struct {
     uint8_t row;
     uint8_t column;
-} cell;
+} cell; // coordinate of a cell on the board
 
 typedef struct {
     uint8_t board[ROWS][COLUMNS];
@@ -54,13 +54,13 @@ typedef struct {
     uint8_t state;
     uint8_t aiTurn;
     int moves;
-} game_t; // game-structure containing current board layout, player with next turn, game state.
+} game_t; // game-structure containing current board, player with next turn, game state, the new Move and total moves.
 
 typedef struct {
     int aiGame;
     int difficulty;
     int randomStart;
-} gameSettings;
+} gameSettings; // stores information about game-modes so functions can work accordingly
 
 int movesToWin(int movesTotal);
 
