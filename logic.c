@@ -267,16 +267,6 @@ int pickBestColumn(const game_t *game, const uint8_t player) {
     return bestColumn;
 }
 
-int isLastNode(game_t *game, cell *newPiece) {
-    return  checkPlayerWon(game, YELLOW, newPiece) ||
-            checkPlayerWon(game, RED, newPiece) ||
-            !countCells(game->board, EMPTY);
-}
-
-void minimax(game_t *game, int depth, int alpha, int beta, uint8_t maximizingPlayer) {
-    //int lastNode = isLastNode(game, );
-}//TODO: add minimax
-
 int computerTurn(game_t *game, gameSettings *settings) {
     if(settings->aiGame && game->aiTurn && game->state == RUNNING_STATE) {
         if(settings->difficulty == EASY) {
